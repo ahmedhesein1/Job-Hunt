@@ -1,21 +1,25 @@
-import type { LinkedInSearch } from '../../../config/linkedin-searches';
-import type { SourceId } from '../../../config/sources';
-import { queryByStatus } from '../../data/jobs';
-import type { ExternalJob, RawSalary } from '../contract';
-import { isRemoteScope, matchesSearch, uncheckedFilters, type LinkedInCandidate } from './search-match';
+import type { LinkedInSearch } from "../../../config/linkedin-searches";
+import type { SourceId } from "../../../config/sources";
+import { queryByStatus } from "../../data/jobs";
+import type { ExternalJob, RawSalary } from "../contract";
+import {
+  isRemoteScope,
+  matchesSearch,
+  uncheckedFilters,
+  type LinkedInCandidate,
+} from "./search-match";
+import { DynamoDomainGateStore } from "../../data/domains";
+import { DomainGate } from "../../scraping/domain-gate";
+import { Fetcher } from "../../scraping/fetcher";
+import { linkedInWebSearchProvider } from "./linkedIn-adapter";
 
 /**
- * Adapter that runs the saved searches. The orchestrator calls it for each search every
+ * Providers that run the saved searches. The orchestrator calls one for each search every
  * cycle; nothing else in the application depends on how it works.
  *
- * The provider used today makes NO network requests. Every job source already has its own
- * collector running at the rate that source allows (company boards every 5–15 min, feeds
- * hourly to daily, saved LinkedIn pages on upload). Each cycle reads only the jobs those
- * collectors stored since the previous cycle (one index query) and runs the 39 searches
- * over them. Jobs keep their real source; matches are recorded on the stored job.
- *
- * A provider that fetches (e.g. a licensed LinkedIn data provider) can replace it behind
- * the same interface; its jobs then go through the shared pipeline as new jobs.
+ * The primary provider scrapes LinkedIn's search results (linkedIn-adapter.ts); its jobs
+ * go through the shared pipeline as new jobs. `storedJobsProvider` runs the same searches
+ * over jobs other collectors already stored, without web requests.
  */
 export interface LinkedInSearchProvider {
   /** Short name shown in /status and run records. */
@@ -31,16 +35,16 @@ export interface LinkedInSearchProvider {
 
 export type ProviderErrorKind =
   /** Network error or 5xx: retried with backoff within the cycle. */
-  | 'TRANSIENT'
+  | "TRANSIENT"
   /** 429 / quota: stop this provider for the rest of the cycle. */
-  | 'RATE_LIMITED'
+  | "RATE_LIMITED"
   /** 401/403, revoked key: stop, never retried in the cycle. */
-  | 'AUTH'
+  | "AUTH"
   /** Access refused or a challenge page: stop, never retried or bypassed. */
-  | 'BLOCKED';
+  | "BLOCKED";
 
 export class ProviderError extends Error {
-  override name = 'ProviderError';
+  override name = "ProviderError";
   constructor(
     readonly kind: ProviderErrorKind,
     message: string,
@@ -49,7 +53,7 @@ export class ProviderError extends Error {
   }
 }
 
-export const NO_PROVIDER_REASON = 'no search provider configured';
+export const NO_PROVIDER_REASON = "no search provider configured";
 
 /** Upper bound on jobs read per cycle (a 3-minute window normally holds a handful). */
 const MAX_CANDIDATES = 300;
@@ -69,12 +73,15 @@ export const dynamoCandidateStore: CandidateStore = {
   async recentJobs(sinceIso, max) {
     // Every new job enters status "New"; the status index is ordered by discovery time,
     // so this reads only the window, never the whole table.
-    return queryByStatus('New', sinceIso, max);
+    return queryByStatus("New", sinceIso, max);
   },
 };
 
 /** A stored job that matched a search, keeping its real source and stored identity. */
-export function candidateToJob(c: LinkedInCandidate, search: LinkedInSearch): ExternalJob {
+export function candidateToJob(
+  c: LinkedInCandidate,
+  search: LinkedInSearch,
+): ExternalJob {
   return {
     sourceId: c.sourceId as SourceId,
     sourceJobId: c.sourceJobId ?? c.jobId ?? c.sourceUrl,
@@ -98,38 +105,60 @@ export function candidateToJob(c: LinkedInCandidate, search: LinkedInSearch): Ex
  * Runs each saved search over the jobs stored since the previous cycle. The window is
  * loaded once per cycle and shared by all searches; nothing is fetched from the web.
  */
-export function storedJobsProvider(ctx: ProviderContext, store: CandidateStore): LinkedInSearchProvider {
+export function storedJobsProvider(
+  ctx: ProviderContext,
+  store: CandidateStore,
+): LinkedInSearchProvider {
   let candidates: Promise<LinkedInCandidate[]> | undefined;
   let count: number | undefined;
   const load = () => {
-    candidates ??= store.recentJobs(new Date(ctx.sinceMs).toISOString(), MAX_CANDIDATES).then(
-      (list) => {
-        count = list.length;
-        return list;
-      },
-      (err: unknown) => {
-        candidates = undefined; // let a retry reload
-        throw new ProviderError('TRANSIENT', `job store: ${(err as Error).message}`);
-      },
-    );
+    candidates ??= store
+      .recentJobs(new Date(ctx.sinceMs).toISOString(), MAX_CANDIDATES)
+      .then(
+        (list) => {
+          count = list.length;
+          return list;
+        },
+        (err: unknown) => {
+          candidates = undefined; // let a retry reload
+          throw new ProviderError(
+            "TRANSIENT",
+            `job store: ${(err as Error).message}`,
+          );
+        },
+      );
     return candidates;
   };
   return {
-    id: 'stored-jobs (all collectors; no web requests)',
+    id: "stored-jobs (all collectors; no web requests)",
     concurrency: 8,
     async search(search) {
       const all = await load();
-      return all.filter((c) => matchesSearch(c, search, ctx.nowMs)).map((c) => candidateToJob(c, search));
+      return all
+        .filter((c) => matchesSearch(c, search, ctx.nowMs))
+        .map((c) => candidateToJob(c, search));
     },
     note(search) {
       const unchecked = uncheckedFilters(search);
-      return unchecked.length > 0 ? `not checkable from stored data: ${unchecked.join(', ')}` : undefined;
+      return unchecked.length > 0
+        ? `not checkable from stored data: ${unchecked.join(", ")}`
+        : undefined;
     },
     searched: () => count,
   };
 }
 
-/** The provider for the 3-minute search cycle. */
-export function linkedinProvider(ctx: ProviderContext): LinkedInSearchProvider {
-  return storedJobsProvider(ctx, dynamoCandidateStore);
+/**
+ * The provider for the 3-minute search cycle: the LinkedIn web search scraper. Its
+ * requests share the persisted domain gate, so linkedin.com spacing and breaker state
+ * carry across cycles and invocations.
+ */
+export function linkedinProvider(
+  _ctx: ProviderContext,
+  cycleId: string,
+): LinkedInSearchProvider {
+  const fetcher = new Fetcher(
+    new DomainGate(new DynamoDomainGateStore(), cycleId),
+  );
+  return linkedInWebSearchProvider(fetcher);
 }

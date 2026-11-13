@@ -107,10 +107,21 @@ describe('scoring (§6.3)', () => {
     }
   });
 
-  it('accepts Gulf on-site roles and rejects citizens-only ones', () => {
-    expect(evaluate(normalizeJob(job({ location: 'Riyadh, Saudi Arabia', remote: false }), profile, NOW), profile, ctx).decision).toBe('MATCH');
-    const nationals = evaluate(normalizeJob(job({ title: 'Backend Engineer - Saudi Nationals Only', location: 'Riyadh', remote: false }), profile, NOW), profile, ctx);
+  it('rejects Gulf on-site roles, keeps Gulf remote ones, and rejects citizens-only ones', () => {
+    expect(evaluate(normalizeJob(job({ location: 'Riyadh, Saudi Arabia', remote: false }), profile, NOW), profile, ctx).decision).toBe('REJECT');
+    expect(evaluate(normalizeJob(job({ location: 'Riyadh, Saudi Arabia', remote: true }), profile, NOW), profile, ctx).decision).toBe('MATCH');
+    const nationals = evaluate(normalizeJob(job({ title: 'Backend Engineer - Saudi Nationals Only', location: 'Riyadh', remote: true }), profile, NOW), profile, ctx);
     expect(nationals.decision).toBe('REJECT');
+  });
+
+  it('without a description, rejects titles naming another stack unless they also show Node', () => {
+    const noDesc = (title: string) => evaluate(normalizeJob(job({ title, description: undefined, location: 'Cairo, Egypt', remote: false }), profile, NOW), profile, ctx);
+    expect(noDesc('Back End Developer - PhP Laravel')).toMatchObject({ decision: 'REJECT', reasons: ['title names another stack: php, laravel'] });
+    expect(noDesc('Senior Data Platform Engineer').decision).toBe('REJECT');
+    expect(noDesc('Backend Engineer (Node.js / Python)').decision).toBe('MATCH');
+    expect(noDesc('Full Stack JavaScript Developer').decision).toBe('MATCH'); // "java" inside "javascript" is not Java
+    // With a description, the Node must-have decides instead.
+    expect(evaluate(normalizeJob(job({ title: 'Backend Engineer (Python)' }), profile, NOW), profile, ctx).decision).toBe('MATCH');
   });
 
   it('does not accept non-software "express" titles', () => {

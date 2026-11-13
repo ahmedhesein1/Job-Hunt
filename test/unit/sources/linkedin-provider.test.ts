@@ -104,7 +104,7 @@ async function importPages(fake: FakeStore): Promise<void> {
 
 const cycle = { concurrency: 4, deadlineMs: Date.now() + 45_000, maxRetries: 2, backoffBaseMs: 10 };
 
-describe('stored-jobs provider through the orchestrator (all 39 searches)', () => {
+describe('stored-jobs provider through the orchestrator (every saved search)', () => {
   it('reports exactly which searches matched, with the stored job records', async () => {
     const fake = new FakeStore();
     await importPages(fake);
@@ -115,12 +115,12 @@ describe('stored-jobs provider through the orchestrator (all 39 searches)', () =
     const result = await runSearchCycle(linkedinSearches, provider, cycle);
 
     expect(result.provider).toBe('stored-jobs (all collectors; no web requests)');
-    // One read of the window for all 39 searches.
+    // One read of the window for all searches.
     expect(calls).toEqual([new Date(NOW - HOUR).toISOString()]);
     expect(result.searched).toBe(5);
-    expect(result.outcomes).toHaveLength(39);
+    expect(result.outcomes).toHaveLength(linkedinSearches.length);
     const counts = summarize(result.outcomes);
-    expect((counts.SUCCESS ?? 0) + (counts.NO_RESULTS ?? 0)).toBe(39);
+    expect((counts.SUCCESS ?? 0) + (counts.NO_RESULTS ?? 0)).toBe(linkedinSearches.length);
 
     const byId = Object.fromEntries(result.outcomes.map((o) => [o.id, o]));
     expect(byId['backend-egypt-24h']).toMatchObject({ status: 'SUCCESS', found: 1 }); // Acme, Cairo, 3 h
@@ -146,7 +146,7 @@ describe('stored-jobs provider through the orchestrator (all 39 searches)', () =
     const fake = new FakeStore();
     await importPages(fake);
     const result = await runSearchCycle(linkedinSearches, storedJobsProvider({ sinceMs: NOW + 1, nowMs: NOW }, storeOver(fake)), cycle);
-    expect(summarize(result.outcomes)).toEqual({ NO_RESULTS: 39 });
+    expect(summarize(result.outcomes)).toEqual({ NO_RESULTS: linkedinSearches.length });
     expect(result.searched).toBe(0);
     expect(result.jobs).toEqual([]);
   });

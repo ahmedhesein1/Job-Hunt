@@ -22,6 +22,11 @@ export const limits = {
   domainGate: {
     /** §5.4: internal starting setting, not a claimed provider limit. */
     defaultMinGapMs: 1_500,
+    /**
+     * Per-host overrides of defaultMinGapMs. linkedin.com (owner decision 2026-11-13): a
+     * short gap so every saved search (~0.9 s each) fits in one 45 s cycle.
+     */
+    hostMinGapMs: { 'www.linkedin.com': 250 } as Readonly<Record<string, number>>,
     leaseMs: 90_000,
     /** Max time a run waits for its *own* host spacing before deferring. */
     maxInlineWaitMs: 3_000,
@@ -100,12 +105,31 @@ export const limits = {
     concurrency: 4,
     /** Stop starting or retrying searches this long into the 60 s invocation. */
     deadlineMs: 45_000,
-    maxRetries: 2,
+    /**
+     * Whole-search retries by the cycle. 0: the scraper's HTTP retries
+     * (scrapeTransientRetries) are the only retry layer, so a failing search costs at most
+     * 1 + scrapeTransientRetries requests.
+     */
+    maxRetries: 0,
     backoffBaseMs: 1_000,
     /** Re-read overlap: longest collector run (rendered pages, 180 s) plus margin. */
     windowOverlapMs: 4 * 60_000,
     /** First cycle ever: search the last day of stored jobs. */
     firstWindowMs: 24 * 60 * 60_000,
+    /**
+     * Guest-endpoint requests per search per cycle. Requests to linkedin.com go one at a
+     * time through the domain gate (domainGate.hostMinGapMs apart).
+     */
+    scrapePagesPerSearch: 1,
+    /** In-request retries of a 5xx/network failure (backoff ~1–2 s); the only retry layer. */
+    scrapeTransientRetries: 1,
+    /** Response cap for one guest results page (normally well under 200 KB). */
+    scrapeMaxPageBytes: 2 * 1024 * 1024,
+    /**
+     * The search order rotates so every search leads a cycle at least once in this many
+     * cycles; searches cut off by the deadline run first in a later cycle.
+     */
+    rotateOverCycles: 3,
   },
   linkedinSnapshot: {
     /** Telegram lets bots download files up to 20 MB; saved result pages are far smaller. */

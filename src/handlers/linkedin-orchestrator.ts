@@ -15,12 +15,25 @@ const policy = sources['linkedin-search'];
 const LOCK = 'source:linkedin-search';
 
 export interface OrchestratorDeps {
-  provider: (ctx: ProviderContext) => LinkedInSearchProvider | undefined;
+  provider: (ctx: ProviderContext, cycleId: string) => LinkedInSearchProvider | undefined | Promise<LinkedInSearchProvider | undefined>;
   nowMs: () => number;
   recordSearchMatches: (jobId: string, labels: string[]) => Promise<boolean>;
 }
 
 const defaultDeps: OrchestratorDeps = { provider: linkedinProvider, nowMs: Date.now, recordSearchMatches };
+
+/**
+ * The saved searches starting at a per-cycle offset. A cycle may end at its deadline
+ * before every search ran; rotating the start makes each search lead a cycle at least once
+ * every `rotateOverCycles` cycles instead of the last ones never running.
+ */
+export function rotatedSearches<T>(searches: readonly T[], startedAtMs: number): T[] {
+  if (searches.length === 0) return [];
+  const cycleIndex = Math.floor(startedAtMs / (limits.linkedinSearch.cycleMinutes * 60_000));
+  const step = Math.ceil(searches.length / limits.linkedinSearch.rotateOverCycles);
+  const offset = (cycleIndex * step) % searches.length;
+  return [...searches.slice(offset), ...searches.slice(0, offset)];
+}
 
 function runStatus(result: CycleResult): RunSummary['status'] {
   return result.outcomes.some((o) => o.status === 'SUCCESS' || o.status === 'NO_RESULTS') ? 'SUCCESS' : 'FAILED';
@@ -45,7 +58,7 @@ export async function runCycle(deps: OrchestratorDeps = defaultDeps): Promise<Ru
     // Read only what was stored since the previous cycle. The overlap covers collectors that
     // stamp discovery time at the start of a run but write up to ~3 minutes later.
     const sinceMs = state.watermark !== undefined ? state.watermark - limits.linkedinSearch.windowOverlapMs : startedAt - limits.linkedinSearch.firstWindowMs;
-    const result = await runSearchCycle(linkedinSearches, deps.provider({ sinceMs, nowMs: startedAt }), {
+    const result = await runSearchCycle(rotatedSearches(linkedinSearches, startedAt), await deps.provider({ sinceMs, nowMs: startedAt }, cycleId), {
       concurrency: limits.linkedinSearch.concurrency,
       deadlineMs: startedAt + limits.linkedinSearch.deadlineMs,
       maxRetries: limits.linkedinSearch.maxRetries,

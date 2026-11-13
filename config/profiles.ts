@@ -51,9 +51,9 @@ export const profiles: SearchProfile[] = [
     // head/architect/manager) is still rejected.
     seniority: { accept: ['junior', 'mid', 'senior'], maxYears: 7 },
     locations: {
-      // Owner decision 2026-11-11: on-site/hybrid in Egypt, the Gulf (GCC) and MENA.
-      // Jobs reserved for nationals ("Saudi nationals only") are still rejected.
-      countries: ['EG', 'SA', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'IQ', 'MA', 'TN', 'DZ', 'LY'],
+      // Owner decision 2026-11-13: on-site/hybrid in Egypt only (the owner lives there).
+      // Other countries, Gulf and MENA included, are accepted only as remote roles.
+      countries: ['EG'],
       remoteRegions: ['WORLDWIDE', 'EMEA', 'AFRICA', 'MENA'],
       minTzOverlapHours: 4,
     },

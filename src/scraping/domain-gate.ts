@@ -52,7 +52,7 @@ export class DomainGate {
     readonly owner: string,
     options: DomainGateOptions = {},
   ) {
-    this.minGap = options.minGapMs ?? (() => limits.domainGate.defaultMinGapMs);
+    this.minGap = options.minGapMs ?? ((hostname) => limits.domainGate.hostMinGapMs[hostname] ?? limits.domainGate.defaultMinGapMs);
     this.now = options.clock ?? Date.now;
     this.sleeper = options.sleeper ?? sleep;
   }

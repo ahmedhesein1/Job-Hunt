@@ -1,7 +1,8 @@
 /**
- * Saved LinkedIn job searches. `/linkedin` sends them
- * as buttons that open in the owner's own browser. A page saved from the browser can then
- * be sent to the bot as an .html file for parsing (see src/sources/linkedin/).
+ * Saved LinkedIn job searches. The 3-minute LinkedIn cycle scrapes every one of them
+ * (src/sources/linkedin/linkedIn-adapter.ts). `/linkedin` also sends them as buttons that
+ * open in the owner's own browser; a page saved from the browser can be sent to the bot as
+ * an .html file for parsing.
  *
  * Keywords use LinkedIn's Boolean search: AND / OR / NOT in capitals, "exact phrases" in
  * straight double quotes, and parentheses for grouping. One Boolean search covers what
@@ -59,7 +60,8 @@ const ANY_BACKEND = `(${NODE} OR ${BACKEND} OR ${FULL_STACK} OR MERN OR (("Softw
 
 /**
  * Gulf and MENA countries by LinkedIn location text (LinkedIn resolves the name; numeric
- * geo IDs are only used where verified). All workplace types: on-site, hybrid, remote.
+ * geo IDs are only used where verified). Remote roles only: on-site and hybrid are
+ * searched in Egypt only (owner decision 2026-11-13).
  */
 const GULF: Array<[id: string, name: string, label: string, date: DatePosted]> = [
   ['saudi', 'Saudi Arabia', 'Saudi Arabia', 'past-24h'],
@@ -82,9 +84,10 @@ function countrySearches(group: SearchGroup, countries: typeof GULF): LinkedInSe
   return countries.map(([id, location, label, datePosted]) => ({
     id: `any-backend-${id}`,
     group,
-    label: `${label} · Backend/Full stack · ${age(datePosted)}`,
+    label: `${label} · Remote Backend · ${age(datePosted)}`,
     keywords: ANY_BACKEND,
     location,
+    workplace: ['remote'],
     datePosted,
     sortByDate: true,
   }));
@@ -112,15 +115,13 @@ export const linkedinSearches: LinkedInSearch[] = [
   { ...egypt, id: 'programmer-sde-egypt-week', label: 'Egypt · Programmer/SDE/MERN · week', keywords: `(Programmer OR SDE OR "Software Development Engineer" OR MERN OR "MEAN Stack" OR "Web Developer") AND (Node OR NodeJS OR "Node.js" OR NestJS OR Express) ${EXCLUDE}`, datePosted: 'past-week' },
   { ...egypt, id: 'easy-apply-egypt-24h', label: 'Egypt · Easy Apply · 24 h', keywords: `(${NODE} OR ${BACKEND}) ${EXCLUDE}`, datePosted: 'past-24h', easyApplyOnly: true },
 
-  // 🏙 Gulf: one search per country, plus the two big markets' Node-only and fresh views.
-  { group: 'fresh', id: 'fresh-gulf-node', label: '⚡ Saudi · Node/Backend · 1 h', keywords: ANY_BACKEND, location: 'Saudi Arabia', datePosted: 'past-hour', sortByDate: true },
-  { group: 'fresh', id: 'fresh-uae-node', label: '⚡ UAE · Node/Backend · 1 h', keywords: ANY_BACKEND, location: 'United Arab Emirates', datePosted: 'past-hour', sortByDate: true },
+  // 🏙 Gulf (remote only): one search per country, plus the two big markets' fresh views.
+  { group: 'fresh', id: 'fresh-gulf-node', label: '⚡ Saudi · Remote Backend · 1 h', keywords: ANY_BACKEND, location: 'Saudi Arabia', workplace: ['remote'], datePosted: 'past-hour', sortByDate: true },
+  { group: 'fresh', id: 'fresh-uae-node', label: '⚡ UAE · Remote Backend · 1 h', keywords: ANY_BACKEND, location: 'United Arab Emirates', workplace: ['remote'], datePosted: 'past-hour', sortByDate: true },
   ...countrySearches('gulf', GULF),
-  { group: 'gulf', id: 'onsite-hybrid-saudi-week', label: 'Saudi · On-site/Hybrid Node · week', keywords: `${NODE} ${EXCLUDE}`, location: 'Saudi Arabia', datePosted: 'past-week', workplace: ['on-site', 'hybrid'], sortByDate: true },
-  { group: 'gulf', id: 'onsite-hybrid-uae-week', label: 'UAE · On-site/Hybrid Node · week', keywords: `${NODE} ${EXCLUDE}`, location: 'United Arab Emirates', datePosted: 'past-week', workplace: ['on-site', 'hybrid'], sortByDate: true },
   { group: 'gulf', id: 'remote-gulf-week', label: 'Gulf · Remote Node · week', keywords: `${NODE} AND (GCC OR Gulf OR KSA OR UAE OR "Saudi Arabia" OR Dubai OR Riyadh) ${EXCLUDE}`, location: 'Worldwide', geoId: LINKEDIN_GEO.worldwide, workplace: ['remote'], datePosted: 'past-week', sortByDate: true },
 
-  // 🌙 MENA (outside Egypt and the Gulf).
+  // 🌙 MENA (outside Egypt and the Gulf; remote only).
   ...countrySearches('mena', MENA),
 
   // 🌍 Remote worldwide: the profile's eligibility check still rejects country-restricted roles.

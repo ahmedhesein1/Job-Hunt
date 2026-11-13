@@ -3,7 +3,7 @@ import { logger } from '../lib/logger';
 import { sleep } from '../lib/time';
 import type { Validators } from '../sources/contract';
 import { GateClosedError, type DomainGate } from './domain-gate';
-import { HttpClient, NetworkError, ResponseTooLargeError, type HttpResponse } from './http-client';
+import { HttpClient, NetworkError, RequestAbortedError, ResponseTooLargeError, type HttpResponse } from './http-client';
 import { UnsafeUrlError } from './redirect-guard';
 import { backoffDelayMs, classifyStatus, isRetryableInRun, looksLikeChallenge, looksLikeChallengePage, type Outcome } from './retry-policy';
 import { crawlDelaySeconds, isAllowed, parseRobots, type RobotsRules } from './robots-policy';
@@ -28,6 +28,14 @@ export interface FetchRequest {
   maxBytes?: number | undefined;
   respectRobots?: boolean | undefined;
   headers?: Record<string, string> | undefined;
+  /** Caller's deadline: stops the request in flight and any further attempts. */
+  signal?: AbortSignal | undefined;
+  /** In-run retries for transient failures (default limits.http.maxTransientRetries). */
+  maxRetries?: number | undefined;
+}
+
+function throwIfCancelled(request: FetchRequest): void {
+  if (request.signal?.aborted) throw new RequestAbortedError(`request to ${new URL(request.url).hostname} cancelled by caller`);
 }
 
 export type FetchOutcome<T> = { kind: 'not-modified' } | { kind: 'ok'; value: T; headers: Headers };
@@ -107,10 +115,12 @@ export class Fetcher {
       throw new SourceHttpError({ type: 'FORBIDDEN', status: 0 }, request.url);
     }
     const hostname = new URL(request.url).hostname;
+    const maxRetries = request.maxRetries ?? limits.http.maxTransientRetries;
     let lastOutcome: Outcome | undefined;
 
-    for (let attempt = 0; attempt <= limits.http.maxTransientRetries; attempt++) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       if (attempt > 0) await this.sleeper(backoffDelayMs(attempt - 1, this.gate.minGapFor(hostname)));
+      throwIfCancelled(request);
       let lease;
       try {
         lease = await this.gate.acquire(hostname);
@@ -128,6 +138,7 @@ export class Fetcher {
           validators: request.validators,
           maxBytes: request.maxBytes,
           headers: request.headers,
+          signal: request.signal,
         });
         outcome = classifyStatus(response.status, response.headers, this.clock());
 
@@ -185,7 +196,7 @@ export class Fetcher {
 
       // §5.5: retry transient failures first; only the final outcome of the request is
       // recorded on the host breaker ("then record failure and let the breaker decide").
-      const willRetry = isRetryableInRun(outcome) && attempt < limits.http.maxTransientRetries;
+      const willRetry = isRetryableInRun(outcome) && attempt < maxRetries;
       await this.gate.release(lease, willRetry ? undefined : outcome);
       lastOutcome = outcome;
       if (!willRetry) break;

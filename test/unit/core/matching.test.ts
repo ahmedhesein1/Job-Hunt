@@ -81,7 +81,7 @@ describe('eligibility (§6.2)', () => {
   it('rejects explicit US-only', () => {
     expect(ev({ location: 'Remote', remote: true, description: 'This role is US only.' }).status).toBe('EXCLUDED');
     expect(ev({ location: 'Remote', description: 'Candidates must be located in the United States' }).status).toBe('EXCLUDED');
-    expect(ev({ location: 'Remote, Canada; Remote, United States' }).status).toBe('EXCLUDED');
+    expect(ev({ location: 'Remote', description: 'You must be legally authorized to work in the United States.' }).status).toBe('EXCLUDED');
   });
   it('does not treat lowercase "us only" as a place', () => {
     expect(ev({ location: 'Remote', remote: true, description: 'Contact us only via the form.' }).status).toBe('UNKNOWN');
@@ -89,6 +89,15 @@ describe('eligibility (§6.2)', () => {
   it('rejects restriction lists without Egypt, accepts lists with it', () => {
     expect(ev({ locationRestrictions: ['Sri Lanka'] }).status).toBe('EXCLUDED');
     expect(ev({ locationRestrictions: ['Egypt', 'India'] }).status).toBe('ELIGIBLE');
+  });
+  it('accepts remote roles in any country unless the text restricts who can apply (owner decision 2026-11-13)', () => {
+    expect(ev({ location: 'Remote - Serbia', remote: true })).toMatchObject({ status: 'UNKNOWN', remoteScope: 'Remote - Serbia' });
+    expect(ev({ location: 'United States', remote: true })).toMatchObject({ status: 'UNKNOWN', remoteScope: 'Remote (United States)' });
+    expect(ev({ location: 'Berlin, Germany (Remote)' }).status).toBe('UNKNOWN');
+    expect(ev({ location: 'Remote, Canada; Remote, United States' }).status).toBe('UNKNOWN');
+    expect(ev({ location: 'Germany', remote: true, description: 'Candidates must be located in Germany.' }).status).toBe('EXCLUDED');
+    expect(ev({ location: 'United Kingdom', remote: true, description: 'UK only.' }).status).toBe('EXCLUDED');
+    expect(ev({ location: 'Spain', remote: true, timezoneOffsets: [-8] }).status).toBe('EXCLUDED');
   });
   it('keeps unknown remote as UNKNOWN, not rejected', () => {
     expect(ev({ location: 'Remote', remote: true }).status).toBe('UNKNOWN');
@@ -107,45 +116,51 @@ describe('eligibility (§6.2)', () => {
     expect(ev({ location: 'Remote - US or EMEA', remote: true }).status).toBe('ELIGIBLE');
   });
 
-  describe('Gulf and MENA (owner decision 2026-11-11)', () => {
+  describe('Gulf and MENA: remote only (owner decision 2026-11-13)', () => {
     it.each([
-      ['Riyadh, Saudi Arabia', 'SA'],
-      ['Dubai, United Arab Emirates (Hybrid)', 'AE'],
-      ['Abu Dhabi', 'AE'],
-      ['Doha, Qatar', 'QA'],
-      ['Kuwait City', 'KW'],
-      ['Manama, Bahrain', 'BH'],
-      ['Muscat, Oman', 'OM'],
-      ['Amman, Jordan', 'JO'],
-      ['Casablanca, Morocco', 'MA'],
-      ['Tunis, Tunisia', 'TN'],
-      ['الرياض، السعودية', 'SA'],
-      ['دبي، الإمارات', 'AE'],
-    ])('accepts on-site/hybrid in %s', (location, code) => {
-      const r = ev({ location, remote: false });
-      expect(r).toMatchObject({ status: 'ELIGIBLE', eligibleRegions: [code] });
+      ['Riyadh, Saudi Arabia'],
+      ['Dubai, United Arab Emirates (Hybrid)'],
+      ['Abu Dhabi'],
+      ['Doha, Qatar'],
+      ['Kuwait City'],
+      ['Manama, Bahrain'],
+      ['Muscat, Oman'],
+      ['Amman, Jordan'],
+      ['Casablanca, Morocco'],
+      ['Tunis, Tunisia'],
+      ['الرياض، السعودية'],
+      ['دبي، الإمارات'],
+    ])('rejects on-site/hybrid in %s, with or without the remote flag set to false', (location) => {
+      expect(ev({ location, remote: false })).toMatchObject({ status: 'EXCLUDED', reason: `on-site in ${location}` });
+      expect(ev({ location }).status).toBe('EXCLUDED');
     });
 
-    it('accepts ISO country codes and Gulf/GCC remote scopes', () => {
-      expect(ev({ location: 'Office', countryCode: 'sa' }).status).toBe('ELIGIBLE');
-      expect(ev({ location: 'Remote - GCC', remote: true }).remoteScope).toBe('Remote (MENA)');
+    it('keeps remote roles based there, and Gulf/GCC remote scopes', () => {
+      expect(ev({ location: 'Riyadh, Saudi Arabia', remote: true }).status).not.toBe('EXCLUDED');
+      expect(ev({ location: 'Dubai, United Arab Emirates (Remote)' }).status).not.toBe('EXCLUDED');
+      expect(ev({ location: 'Remote - GCC', remote: true })).toMatchObject({ status: 'ELIGIBLE', remoteScope: 'Remote (MENA)' });
       expect(ev({ locationRestrictions: ['Gulf region'] }).status).toBe('ELIGIBLE');
     });
 
+    it('rejects an on-site ISO country code outside Egypt', () => {
+      expect(ev({ location: 'Office', countryCode: 'sa' }).status).toBe('EXCLUDED');
+      expect(ev({ location: 'Office', countryCode: 'eg' }).status).toBe('ELIGIBLE');
+    });
+
     it.each([
-      [{ title: 'Backend Developer (Saudi Nationals Only)', location: 'Riyadh' }],
-      [{ location: 'Riyadh, Saudi Arabia', description: 'This position is only open to Saudi nationals.' }],
-      [{ location: 'Dubai', description: 'UAE Nationals are required for this Emiratisation role.' }],
-      [{ location: 'Jeddah', description: 'Saudization position for fresh graduates.' }],
-      [{ location: 'الرياض', description: 'الوظيفة للسعوديين فقط' }],
-      [{ location: 'الرياض', description: 'أن يكون سعودي الجنسية' }],
-    ])('rejects citizens-only roles even in accepted countries: %o', (input) => {
+      [{ title: 'Backend Developer (Saudi Nationals Only)', location: 'Riyadh', remote: true }],
+      [{ location: 'Riyadh, Saudi Arabia', remote: true, description: 'This position is only open to Saudi nationals.' }],
+      [{ location: 'Dubai', remote: true, description: 'UAE Nationals are required for this Emiratisation role.' }],
+      [{ location: 'Jeddah', remote: true, description: 'Saudization position for fresh graduates.' }],
+      [{ location: 'الرياض', remote: true, description: 'الوظيفة للسعوديين فقط' }],
+      [{ location: 'الرياض', remote: true, description: 'أن يكون سعودي الجنسية' }],
+    ])('rejects citizens-only roles, remote included: %o', (input) => {
       expect(ev(input)).toMatchObject({ status: 'EXCLUDED', reason: expect.stringMatching(/^nationals only/) });
     });
 
     it('does not mistake "Saudi nationals preferred" or company names for restrictions', () => {
-      expect(ev({ location: 'Riyadh', description: 'Saudi nationals preferred; all nationalities welcome.' }).status).toBe('ELIGIBLE');
-      expect(ev({ location: 'Dubai', description: 'Work with Emirates NBD and Saudi Aramco clients.' }).status).toBe('ELIGIBLE');
+      expect(ev({ location: 'Riyadh', remote: true, description: 'Saudi nationals preferred; all nationalities welcome.' }).status).not.toBe('EXCLUDED');
+      expect(ev({ location: 'Cairo, Egypt', description: 'Work with Emirates NBD and Saudi Aramco clients.' }).status).toBe('ELIGIBLE');
     });
 
     it('still rejects on-site outside the accepted countries', () => {
@@ -156,7 +171,6 @@ describe('eligibility (§6.2)', () => {
       // Remote flag not provided by the feed (Ashby/Workable/Greenhouse leave it unset).
       expect(ev({ location: 'Sofia, Bulgaria' }).status).toBe('EXCLUDED');
       expect(ev({ location: 'Sofia, Bulgaria; Cairo, Egypt' }).status).toBe('ELIGIBLE');
-      expect(ev({ location: 'Remote - Serbia', remote: true }).status).toBe('EXCLUDED');
       expect(ev({ location: 'London', countryCode: 'GB', remote: false }).status).toBe('EXCLUDED');
     });
   });

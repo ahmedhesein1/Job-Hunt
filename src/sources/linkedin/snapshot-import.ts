@@ -6,10 +6,20 @@ import { getSettings } from '../../data/settings';
 import { getSourceState, recordRun, saveSourceState, type RunSummary } from '../../data/sources';
 import { logger } from '../../lib/logger';
 import { DAY_MS } from '../../lib/time';
-import type { ExternalJob } from '../contract';
+import type { ExternalJob, SourceAdapter } from '../contract';
 import { parseLinkedInSearchPage, type LinkedInCard, type SnapshotLayout } from './search-page';
 
 const policy = sources['linkedin-snapshot'];
+
+/**
+ * Scheduled-run entry for `linkedin-snapshot` in sync-source. Saved pages are imported when
+ * the owner uploads them (telegram-webhook → importLinkedInSnapshot), so a scheduled or
+ * manual sync-source run has nothing to fetch: it reports why and makes no request.
+ */
+export const linkedInSnapshotAdapter: SourceAdapter = {
+  id: 'linkedin-snapshot',
+  fetch: async () => ({ kind: 'skipped', reason: 'imported from uploaded pages (Telegram), not fetched on a schedule' }),
+};
 
 /** Maps a parsed card onto the shared source contract. */
 export function cardToExternalJob(card: LinkedInCard): ExternalJob {

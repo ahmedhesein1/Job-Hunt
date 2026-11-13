@@ -71,7 +71,8 @@ export function classifyStatus(status: number, headers: Headers, nowMs: number):
   if (status === 401 || status === 407) return { type: 'AUTH', status };
   if (status === 403) return { type: 'FORBIDDEN', status };
   if (status === 404 || status === 410) return { type: 'NOT_FOUND', status };
-  if (status === 429) return { type: 'RATE_LIMITED', retryAfterMs: parseRetryAfter(headers.get('retry-after'), nowMs) };
+  // 999 is LinkedIn's "request denied" throttling response: a rate limit, not a server fault.
+  if (status === 429 || status === 999) return { type: 'RATE_LIMITED', retryAfterMs: parseRetryAfter(headers.get('retry-after'), nowMs) };
   if (status === 503 && headers.get('retry-after')) {
     // 503 + Retry-After is a load-shedding signal; treat it like a rate limit.
     return { type: 'RATE_LIMITED', retryAfterMs: parseRetryAfter(headers.get('retry-after'), nowMs) };

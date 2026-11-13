@@ -6,3 +6,4 @@ coverage/
 .env.*
 samconfig.local.toml
 a.txt
+.tmp/

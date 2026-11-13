@@ -16,12 +16,19 @@ export class NetworkError extends Error {
   override name = 'NetworkError';
 }
 
+/** The caller's signal ended the request (e.g. a cycle deadline): not a network fault. */
+export class RequestAbortedError extends Error {
+  override name = 'RequestAbortedError';
+}
+
 export interface GetOptions {
   allowedHosts: readonly string[];
   accept: string;
   validators?: Validators | undefined;
   maxBytes?: number | undefined;
   headers?: Record<string, string> | undefined;
+  /** Caller's cancellation (e.g. a deadline); combined with the client's own timeout. */
+  signal?: AbortSignal | undefined;
 }
 
 export interface HttpResponse {
@@ -51,14 +58,21 @@ export function defaultUserAgent(): string {
   return contact ? `JobFinder/1.0 (+${contact})` : 'JobFinder/1.0 (personal job alert bot)';
 }
 
-async function* readCapped(body: ReadableStream<Uint8Array> | null, maxBytes: number, host: string): AsyncGenerator<string> {
+async function* readCapped(body: ReadableStream<Uint8Array> | null, maxBytes: number, host: string, caller: AbortSignal | undefined): AsyncGenerator<string> {
   if (!body) return;
   const decoder = new TextDecoder('utf-8');
   let total = 0;
   const reader = body.getReader();
   try {
     for (;;) {
-      const { done, value } = await reader.read();
+      let chunk: Awaited<ReturnType<typeof reader.read>>;
+      try {
+        chunk = await reader.read();
+      } catch (err) {
+        if (caller?.aborted) throw new RequestAbortedError(`response from ${host} cancelled by caller`);
+        throw err;
+      }
+      const { done, value } = chunk;
       if (done) break;
       total += value.byteLength;
       // §9 usage: decoded bytes downloaded (inbound transfer is free; tracked for visibility).
@@ -91,7 +105,9 @@ export class HttpClient {
 
   async get(url: string, options: GetOptions): Promise<HttpResponse> {
     const maxBytes = options.maxBytes ?? limits.http.maxJsonBytes;
-    const signal = AbortSignal.timeout(this.timeoutMs);
+    options.signal?.throwIfAborted();
+    const timeout = AbortSignal.timeout(this.timeoutMs);
+    const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout;
     const headers: Record<string, string> = {
       'user-agent': this.userAgent,
       accept: options.accept,
@@ -111,6 +127,7 @@ export class HttpClient {
       try {
         response = await this.fetchImpl(current, { method: 'GET', headers, redirect: 'manual', signal });
       } catch (err) {
+        if (options.signal?.aborted) throw new RequestAbortedError(`request to ${host} cancelled by caller`);
         countUsage('httpErrors');
         const name = (err as Error).name;
         throw new NetworkError(name === 'TimeoutError' || name === 'AbortError' ? `timeout after ${this.timeoutMs} ms` : `network error: ${(err as Error).message}`);
@@ -133,7 +150,7 @@ export class HttpClient {
       const take = () => {
         if (consumed) throw new Error('Response body already consumed');
         consumed = true;
-        return readCapped(body, maxBytes, host);
+        return readCapped(body, maxBytes, host, options.signal);
       };
       return {
         status: response.status,

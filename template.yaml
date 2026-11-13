@@ -433,8 +433,7 @@ Resources:
         Tick:
           Type: ScheduleV2
           Properties:
-            # Owner requirement: LinkedIn coverage every 3 minutes (alert emails are the
-            # permitted automated route). One Gmail history call per tick.
+            # LinkedIn alert emails every 3 minutes. One Gmail history call per tick.
             ScheduleExpression: rate(3 minutes)
             State: !If [GmailOn, ENABLED, DISABLED]
 

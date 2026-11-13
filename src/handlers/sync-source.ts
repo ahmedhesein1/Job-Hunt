@@ -29,16 +29,18 @@ import { jobicyAdapter } from '../sources/jobicy';
 import { remoteOkAdapter } from '../sources/remoteok';
 import { wuzzufAdapter } from '../sources/wuzzuf-rss';
 import { careerPagesAdapter } from '../sources/career-pages';
+import { linkedInSnapshotAdapter } from '../sources/linkedin/snapshot-import';
 import { dynamoSeenStore } from '../data/seen';
 import { cairoDayKey } from '../lib/time';
 import { withUsage } from '../lib/usage';
 
-const ADAPTERS: Record<SyncableSourceId, SourceAdapter> = {
+export const ADAPTERS: Record<SyncableSourceId, SourceAdapter> = {
   himalayas: himalayasAdapter,
   remoteok: remoteOkAdapter,
   wuzzuf: wuzzufAdapter,
   jobicy: jobicyAdapter,
   hn: hnAdapter,
+  'linkedin-snapshot': linkedInSnapshotAdapter,
   'career-pages': careerPagesAdapter,
   // Rendered pages run in the separate browser function (sync-rendered-pages).
   'career-pages-js': { id: 'career-pages-js', fetch: async () => ({ kind: 'skipped', reason: 'runs in the browser function' }) },

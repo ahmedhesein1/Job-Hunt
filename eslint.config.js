@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['node_modules', '.aws-sam', 'coverage'] },
+  { ignores: ['node_modules', '.aws-sam', 'coverage', '.tmp'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

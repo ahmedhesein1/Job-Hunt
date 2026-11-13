@@ -78,8 +78,10 @@ export async function runSearchCycle(searches: readonly LinkedInSearch[], provid
       const remaining = opts.deadlineMs - now();
       if (remaining <= 0) return { id: search.id, status: 'DEADLINE', ms: now() - started, attempts };
       attempts += 1;
+      // Aborts the search's requests in flight when the cycle deadline is reached.
+      const signal = AbortSignal.timeout(remaining);
       try {
-        const found = await provider.search(search, AbortSignal.timeout(remaining));
+        const found = await provider.search(search, signal);
         for (const job of found) {
           const key = job.storedJobId ?? `${job.sourceId}#${job.sourceJobId}`;
           const existing = jobs.get(key);
@@ -103,6 +105,8 @@ export async function runSearchCycle(searches: readonly LinkedInSearch[], provid
           stopped ??= stop;
           return { id: search.id, status: stop, ms: now() - started, attempts, detail };
         }
+        // Cut off by the cycle deadline: retried next cycle, not a source failure.
+        if (signal.aborted || now() >= opts.deadlineMs) return { id: search.id, status: 'DEADLINE', ms: now() - started, attempts, detail };
         if (attempts > opts.maxRetries) return { id: search.id, status: 'FAILED', ms: now() - started, attempts, detail };
         // Full jitter: random delay up to base × 2^(attempt-1), never past the deadline.
         const backoff = random() * opts.backoffBaseMs * 2 ** (attempts - 1);

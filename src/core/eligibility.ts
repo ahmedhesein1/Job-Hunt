@@ -133,7 +133,8 @@ const EXCLUSION_PATTERNS: RegExp[] = [
     'u',
   ),
   new RegExp(`(?i:(?:legally\\s+)?authori[sz]ed\\s+to\\s+work\\s+in)\\s+${PLACE}${END}`, 'u'),
-  new RegExp(`(?i:remote)\\s*(?:-|–|\\(|,|(?i:in))\\s*${PLACE}${END}`, 'u'),
+  // "Remote - US" / "Remote (UK)" is a location label, not a restriction on who can apply:
+  // remote roles in any country are accepted (owner decision 2026-11-13).
 ];
 
 const REMOTE_WORDS = ['remote', 'remotely', 'work from home', 'wfh', 'distributed', 'عن بعد'];
@@ -246,16 +247,25 @@ export function evaluateEligibility(input: EligibilityInput, profile: SearchProf
   }
 
   if (isRemote === true) {
-    if (locClass.nonEgyptPlace) {
-      return { status: 'EXCLUDED', remoteScope: `Remote (${location})`, eligibleRegions: [], reason: `remote limited to ${locClass.nonEgyptPlace}` };
-    }
-    // Remote with no stated region: eligibility is unknown, not rejected (§6.2).
-    return { status: 'UNKNOWN', remoteScope: 'Remote', eligibleRegions: [] };
+    // Remote roles in any country are accepted (owner decision 2026-11-13); explicit
+    // restrictions on who can apply were rejected above. Whether the employer hires from
+    // Egypt is unknown, not rejected (§6.2).
+    // The scope keeps the stated country ("Remote (Germany)"); otherwise plain "Remote" as before
+    // (the scope is part of the dedupe fingerprint).
+    const named = locClass.nonEgyptPlace || countriesIn(location).length > 0;
+    const scope = !named ? 'Remote' : REMOTE_WORDS.some((w) => containsTerm(normalizeForMatch(location), w)) ? location : `Remote (${location})`;
+    return { status: 'UNKNOWN', remoteScope: scope, eligibleRegions: [] };
   }
 
   // On-site / hybrid outside Egypt.
   if (input.countryCode && !profile.locations.countries.includes(input.countryCode.toUpperCase())) {
     return { status: 'EXCLUDED', remoteScope: location || input.countryCode, eligibleRegions: [], reason: `on-site in ${input.countryCode}` };
+  }
+  // A known country outside the profile (e.g. "Riyadh, Saudi Arabia", "Dubai (Hybrid)") with
+  // no remote wording: on-site or hybrid there.
+  const outside = countriesIn(location).filter((code) => !profile.locations.countries.includes(code));
+  if (outside.length > 0) {
+    return { status: 'EXCLUDED', remoteScope: location, eligibleRegions: [], reason: `on-site in ${location}` };
   }
   // A location naming only places outside the profile, with no remote wording, is an
   // on-site role there (remote roles returned above). Most ATS feeds leave `remote`

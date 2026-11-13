@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { limits } from '../../../config/limits';
+import { linkedinSearches } from '../../../config/linkedin-searches';
+
+const N = linkedinSearches.length;
 import { ProviderError, type LinkedInSearchProvider } from '../../../src/sources/linkedin/provider';
 
 const mocks = vi.hoisted(() => ({
@@ -39,10 +43,10 @@ describe('LinkedIn orchestrator run records (§3: never report a skipped search 
     mocks.recordSearchMatches.mockResolvedValue(true);
   });
 
-  it('without a provider: records PROVIDER_UNAVAILABLE, 39 outcomes, nothing processed', async () => {
+  it('without a provider: records PROVIDER_UNAVAILABLE for every search, nothing processed', async () => {
     const run = await runCycle({ provider: () => undefined, nowMs: () => NOW, recordSearchMatches: mocks.recordSearchMatches });
-    expect(run).toMatchObject({ status: 'FAILED', found: 0, detail: '39 searches: 39 PROVIDER_UNAVAILABLE' });
-    expect(run?.outcomes).toHaveLength(39);
+    expect(run).toMatchObject({ status: 'FAILED', found: 0, detail: `${N} searches: ${N} PROVIDER_UNAVAILABLE` });
+    expect(run?.outcomes).toHaveLength(N);
     expect(mocks.processJobs).not.toHaveBeenCalled();
     expect(mocks.saveSourceState).toHaveBeenCalledWith('linkedin-search', expect.objectContaining({ success: false, watermark: undefined }), NOW);
     expect(mocks.recordRun).toHaveBeenCalledOnce();
@@ -63,10 +67,10 @@ describe('LinkedIn orchestrator run records (§3: never report a skipped search 
     const run = await runCycle({ provider: () => provider, nowMs: () => NOW, recordSearchMatches: mocks.recordSearchMatches });
     expect(run?.status).toBe('SUCCESS');
     expect(run?.found).toBe(2);
-    expect(run?.detail).toContain('37 NO_RESULTS');
+    expect(run?.detail).toContain(`${N - 2} NO_RESULTS`);
     expect(run?.detail).toContain('1 SUCCESS');
     expect(run?.detail).toContain('1 FAILED');
-    expect(run?.outcomes?.find((o) => o.id === 'nestjs-egypt-24h')).toMatchObject({ status: 'FAILED', attempts: 3, detail: '503 Service Unavailable' });
+    expect(run?.outcomes?.find((o) => o.id === 'nestjs-egypt-24h')).toMatchObject({ status: 'FAILED', attempts: limits.linkedinSearch.maxRetries + 1, detail: '503 Service Unavailable' });
     expect(run?.outcomes?.find((o) => o.id === 'backend-egypt-24h')).toMatchObject({ status: 'SUCCESS', found: 2 });
     expect(mocks.processJobs).toHaveBeenCalledWith([job('1'), job('2')], expect.objectContaining({ bootstrapped: true }));
     expect(mocks.saveSourceState).toHaveBeenCalledWith('linkedin-search', expect.objectContaining({ success: true }), NOW);
@@ -78,7 +82,7 @@ describe('LinkedIn orchestrator run records (§3: never report a skipped search 
     });
     const run = await runCycle({ provider: () => ({ id: 'test', concurrency: 1, search }), nowMs: () => NOW, recordSearchMatches: mocks.recordSearchMatches });
     expect(run?.status).toBe('FAILED');
-    expect(run?.detail).toBe('39 searches: 1 BLOCKED, 38 PROVIDER_STOPPED via test');
+    expect(run?.detail).toBe(`${N} searches: 1 BLOCKED, ${N - 1} PROVIDER_STOPPED via test`);
     expect(search).toHaveBeenCalledOnce();
     expect(mocks.saveSourceState).toHaveBeenCalledWith('linkedin-search', expect.objectContaining({ success: false }), NOW);
   });

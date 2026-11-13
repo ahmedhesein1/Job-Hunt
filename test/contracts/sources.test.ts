@@ -95,9 +95,9 @@ describe('Greenhouse contract', () => {
     expect(n.canonicalUrl).toMatch(/^https:\/\/boards\.greenhouse\.io\/gitlab\/jobs\/\d+$/);
   });
 
-  it('excludes "Remote, Canada; Remote, United States"', () => {
+  it('keeps "Remote, Canada; Remote, United States" as remote with unknown eligibility', () => {
     const backend = jobs.find((j) => j.location === 'Remote, Canada; Remote, United States')!;
-    expect(normalizeJob(backend, profile, NOW).eligibility).toBe('EXCLUDED');
+    expect(normalizeJob(backend, profile, NOW)).toMatchObject({ eligibility: 'UNKNOWN', remoteScope: 'Remote, Canada; Remote, United States' });
   });
 });
 
@@ -126,9 +126,9 @@ describe('Ashby contract', () => {
     normalizesAll(jobs);
   });
 
-  it('excludes "Remote - European Union"', () => {
+  it('keeps "Remote - European Union" as remote with unknown eligibility', () => {
     const eu = jobs.find((j) => /European Union/.test(j.location ?? ''))!;
-    expect(normalizeJob(eu, profile, NOW).eligibility).toBe('EXCLUDED');
+    expect(normalizeJob(eu, profile, NOW).eligibility).toBe('UNKNOWN');
   });
 });
 

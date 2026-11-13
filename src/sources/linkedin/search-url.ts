@@ -1,13 +1,18 @@
 import type { DatePosted, EmploymentType, ExperienceLevel, LinkedInSearch, Workplace } from '../../../config/linkedin-searches';
 
 /**
- * Builds LinkedIn job-search URLs for the owner to open in their own browser. Nothing in
- * this project fetches these URLs.
+ * Builds LinkedIn job-search URLs: the results page (Telegram buttons that open in the
+ * owner's browser) and the guest results endpoint the scraper fetches. Both take the same
+ * filters.
  *
  * Parameter values follow LinkedIn's public search URLs: f_TPR (seconds since posting),
  * f_E (experience), f_JT (job type), f_WT (workplace), f_AL (Easy Apply), sortBy=DD.
  */
 const BASE = 'https://www.linkedin.com/jobs/search';
+/** Logged-out results endpoint: returns the job cards of one results page as HTML `<li>`s. */
+const GUEST_BASE = 'https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search';
+/** Hosts the scraper may request (redirects anywhere else are refused). */
+export const LINKEDIN_HOSTS = ['www.linkedin.com', 'linkedin.com'] as const;
 /** Cards per results page. */
 export const LINKEDIN_PAGE_SIZE = 25;
 /** LinkedIn stops paginating at 1,000 results. */
@@ -69,11 +74,10 @@ export function normalizeKeywords(raw: string, id = 'search'): string {
   return keywords;
 }
 
-/** URL for one results page (`page` is 0-based). */
-export function buildLinkedInSearchUrl(search: LinkedInSearch, page = 0): string {
+/** Keyword and filter parameters shared by the results page and the guest endpoint. */
+function searchParams(search: LinkedInSearch): URLSearchParams {
   const keywords = normalizeKeywords(search.keywords, search.id);
   if (search.geoId !== undefined && !/^\d+$/.test(search.geoId)) throw new InvalidSearchError(`search ${search.id}: geoId must be numeric`);
-  if (!Number.isInteger(page) || page < 0 || page > MAX_PAGE) throw new InvalidSearchError(`page must be an integer from 0 to ${MAX_PAGE}`);
 
   const params = new URLSearchParams({ keywords });
   const location = search.location?.trim();
@@ -91,10 +95,31 @@ export function buildLinkedInSearchUrl(search: LinkedInSearch, page = 0): string
     ['sortBy', search.sortByDate ? 'DD' : undefined],
   ];
   for (const [key, value] of optional) if (value) params.set(key, value);
+  return params;
+}
+
+/** URL for one results page (`page` is 0-based). */
+export function buildLinkedInSearchUrl(search: LinkedInSearch, page = 0): string {
+  const params = searchParams(search);
+  if (!Number.isInteger(page) || page < 0 || page > MAX_PAGE) throw new InvalidSearchError(`page must be an integer from 0 to ${MAX_PAGE}`);
   params.set('position', '1');
   params.set('pageNum', String(page));
   if (page > 0) params.set('start', String(page * LINKEDIN_PAGE_SIZE));
   return `${BASE}?${params.toString()}`;
+}
+
+/** LinkedIn serves at most 1,000 results per search. */
+const MAX_START = 1000;
+
+/**
+ * Guest-endpoint URL for the cards starting at result `start` (0-based). The endpoint's
+ * page size varies, so callers advance `start` by the number of cards actually returned.
+ */
+export function buildLinkedInGuestSearchUrl(search: LinkedInSearch, start = 0): string {
+  const params = searchParams(search);
+  if (!Number.isInteger(start) || start < 0 || start >= MAX_START) throw new InvalidSearchError(`start must be an integer from 0 to ${MAX_START - 1}`);
+  params.set('start', String(start));
+  return `${GUEST_BASE}?${params.toString()}`;
 }
 
 /** Checks every saved search once (used at startup of the command and in tests). */

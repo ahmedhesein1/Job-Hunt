@@ -10,7 +10,7 @@ import { decideDelivery } from '../notifications/queue';
 import type { ExternalJob } from '../sources/contract';
 import { fingerprintMatchIsDuplicate, urlHash } from './dedupe';
 import { isUsable, normalizeJob, type NormalizedJob } from './normalize';
-import { evaluateAll, explainEvaluation } from './scoring';
+import { evaluateAll, explainEvaluation, titleShowsNode } from './scoring';
 import { parseAtsUrl, type AtsPosting } from './url';
 
 export interface PipelineContext {
@@ -143,6 +143,10 @@ export async function processJobs(externalJobs: ExternalJob[], ctx: PipelineCont
         settings,
         ctx.nowMs,
       );
+      // Without a description the Node must-have cannot be checked: unless the title itself
+      // shows Node, the job goes to the digest instead of an instant alert.
+      const nodeUnverified = !job.hasDescription && !titleShowsNode(job.title);
+      if (delivery === 'INSTANT' && nodeUnverified) delivery = 'DIGEST';
 
       const attempt = async (d: Delivery) =>
         store.insertJob({
@@ -179,7 +183,7 @@ export async function processJobs(externalJobs: ExternalJob[], ctx: PipelineCont
         settings.day = today;
       }
       if (delivery === 'DIGEST') stats.digest += 1;
-      report(external, { result: 'stored', explanation: explainEvaluation(evaluation), score: evaluation.score, confidence: evaluation.confidence, delivery });
+      report(external, { result: 'stored', explanation: `${explainEvaluation(evaluation)}${nodeUnverified ? ' · Node not verifiable (no description)' : ''}`, score: evaluation.score, confidence: evaluation.confidence, delivery });
     } catch (err) {
       stats.malformed += 1;
       report(external, { result: 'malformed', explanation: 'processing failed' });

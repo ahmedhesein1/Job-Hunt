@@ -8,6 +8,27 @@ const TOTAL_WEIGHT = WEIGHTS.title + WEIGHTS.skills + WEIGHTS.eligibility + WEIG
 
 const NODE_ECOSYSTEM_TITLE_TERMS = ['node', 'nodejs', 'node.js', 'nestjs'];
 
+/** Title terms that show a Node.js role on their own (used when there is no description). */
+const NODE_TITLE_EVIDENCE = [...NODE_ECOSYSTEM_TITLE_TERMS, 'express.js', 'expressjs', 'mern', 'mean stack'];
+
+/**
+ * Stacks or fields that make a title clearly not a Node.js role when nothing else says
+ * Node. Applied only to jobs without a description (e.g. LinkedIn job cards), where the
+ * must-have skill check cannot run. Found with a real saved page (2026-11-13): a "Back End
+ * Developer - PhP Laravel" card otherwise passed on the word "back end".
+ */
+const OTHER_STACK_TITLE_TERMS = [
+  'php', 'laravel', 'symfony', 'wordpress', 'python', 'django', 'flask', 'fastapi', 'java', 'spring',
+  'kotlin', 'scala', '.net', 'dotnet', 'c#', 'asp.net', 'c++', 'ruby', 'rails', 'golang', 'rust',
+  'salesforce', 'sap', 'oracle', 'abap', 'odoo', 'data platform', 'data engineer', 'embedded',
+];
+
+/** True when the title alone shows a Node.js role. */
+export function titleShowsNode(title: string): boolean {
+  const t = normalizeForMatch(title);
+  return NODE_TITLE_EVIDENCE.some((term) => containsTerm(t, term));
+}
+
 export type Evaluation =
   | { decision: 'REJECT'; profileId: string; reasons: string[] }
   | {
@@ -37,6 +58,10 @@ export function hardFilterReasons(job: NormalizedJob, profile: SearchProfile, ct
   if (job.hasDescription) {
     const missing = profile.mustHaveSkills.filter((s) => !job.skills.includes(s));
     if (missing.length > 0) reasons.push(`missing must-have: ${missing.join(', ')}`);
+  } else if (!titleShowsNode(job.title)) {
+    // No description to check Node against: a title naming another stack is clear evidence.
+    const other = matchingTerms(title, OTHER_STACK_TITLE_TERMS);
+    if (other.length > 0) reasons.push(`title names another stack: ${other.join(', ')}`);
   }
   if (profile.minSalaryUsdMonth !== undefined && job.salary?.usdMonthlyMax !== undefined && job.salary.usdMonthlyMax < profile.minSalaryUsdMonth) {
     reasons.push('salary below minimum');

@@ -45,10 +45,10 @@ function day(d: string, scale = 1): DailyUsage {
 describe('workload for the 3-minute LinkedIn cycle (§5)', () => {
   it('distinguishes cycles, orchestrator invocations and search executions', () => {
     const cyclesPerDay = (24 * 60) / limits.linkedinSearch.cycleMinutes;
-    expect(linkedinSearches).toHaveLength(39);
+    expect(linkedinSearches).toHaveLength(37);
     expect(cyclesPerDay).toBe(480);
     expect(cyclesPerDay * 30).toBe(14_400); // scheduler invocations = orchestrator invocations
-    expect(cyclesPerDay * 30 * linkedinSearches.length).toBe(561_600); // individual search executions
+    expect(cyclesPerDay * 30 * linkedinSearches.length).toBe(532_800); // individual search executions
   });
 
   it('fits a 14,400-invocation orchestrator inside the Lambda request allowance', () => {

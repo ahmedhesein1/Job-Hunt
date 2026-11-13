@@ -43,12 +43,12 @@ function fakeClock() {
 describe('LinkedIn search cycle (§3, §4)', () => {
   const opts = (clock: ReturnType<typeof fakeClock>, extra = {}) => ({ concurrency: 4, deadlineMs: clock.now() + 45_000, maxRetries: 2, backoffBaseMs: 1_000, now: clock.now, sleep: clock.sleep, random: () => 0.5, ...extra });
 
-  it('records an outcome for all 39 searches when no provider is authorized', async () => {
+  it('records an outcome for every saved search when no provider is authorized', async () => {
     const clock = fakeClock();
     const r = await runSearchCycle(linkedinSearches, undefined, opts(clock));
-    expect(r.outcomes).toHaveLength(39);
+    expect(r.outcomes).toHaveLength(linkedinSearches.length);
     expect(new Set(r.outcomes.map((o) => o.id))).toEqual(new Set(linkedinSearches.map((s) => s.id)));
-    expect(summarize(r.outcomes)).toEqual({ PROVIDER_UNAVAILABLE: 39 });
+    expect(summarize(r.outcomes)).toEqual({ PROVIDER_UNAVAILABLE: linkedinSearches.length });
     expect(r.outcomes[0]?.detail).toBe("no search provider configured");
   });
 
@@ -69,9 +69,9 @@ describe('LinkedIn search cycle (§3, §4)', () => {
     };
     const r = await runSearchCycle(linkedinSearches, provider, opts(clock));
     expect(peak).toBeLessThanOrEqual(3);
-    expect(summarize(r.outcomes)).toEqual({ SUCCESS: 39 });
-    expect(r.jobs).toHaveLength(40); // job "1" from every search counted once
-    expect(r.duplicates).toBe(38);
+    expect(summarize(r.outcomes)).toEqual({ SUCCESS: linkedinSearches.length });
+    expect(r.jobs).toHaveLength(linkedinSearches.length + 1); // job "1" from every search counted once
+    expect(r.duplicates).toBe(linkedinSearches.length - 1);
   });
 
   it('retries transient errors with backoff and isolates a failing search', async () => {
