@@ -1,6 +1,6 @@
 import { BatchGetCommand, BatchWriteCommand, type BatchGetCommandOutput, type BatchWriteCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { sha256Hex } from '../core/url';
-import { ttlAfterDays } from '../lib/time';
+import { sleep, ttlAfterDays } from '../lib/time';
 import { ddb, tableName } from './client';
 import { keys } from './keys';
 
@@ -14,6 +14,8 @@ export interface SeenStore {
 }
 
 const SEEN_TTL_DAYS = 30;
+/** Wait before retrying items DynamoDB left unprocessed (throttling): 100, 200, 400… ms. */
+const retryDelayMs = (attempt: number) => 100 * 2 ** attempt;
 const hash = (url: string) => sha256Hex(url).slice(0, 32);
 
 export const dynamoSeenStore: SeenStore = {
@@ -24,6 +26,7 @@ export const dynamoSeenStore: SeenStore = {
         [tableName()]: { Keys: urls.slice(i, i + 100).map((u) => keys.seenPage(hash(u))), ProjectionExpression: 'PK' } as never,
       };
       for (let attempt = 0; request && attempt < 5; attempt++) {
+        if (attempt > 0) await sleep(retryDelayMs(attempt - 1));
         const result: BatchGetCommandOutput = await ddb().send(new BatchGetCommand({ RequestItems: request }));
         for (const item of result.Responses?.[tableName()] ?? []) seen.add(String(item.PK));
         const rest: Array<Record<string, unknown>> | undefined = result.UnprocessedKeys?.[tableName()]?.Keys;
@@ -40,6 +43,7 @@ export const dynamoSeenStore: SeenStore = {
         PutRequest: { Item: { ...keys.seenPage(hash(u)), entity: 'SEEN', url: u, ttl: ttlAfterDays(nowMs, SEEN_TTL_DAYS) } },
       }));
       for (let attempt = 0; writes?.length && attempt < 5; attempt++) {
+        if (attempt > 0) await sleep(retryDelayMs(attempt - 1));
         const result: BatchWriteCommandOutput = await ddb().send(new BatchWriteCommand({ RequestItems: { [tableName()]: writes as never } }));
         writes = result.UnprocessedItems?.[tableName()] as Array<Record<string, unknown>> | undefined;
       }
