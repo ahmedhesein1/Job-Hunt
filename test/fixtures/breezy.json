@@ -1,0 +1,225 @@
+[
+  {
+    "id": "3b2baa070de8",
+    "friendly_id": "3b2baa070de8-application-security-appsec-engineer",
+    "name": "Application Security (AppSec) Engineer",
+    "url": "https://joom-group.breezy.hr/p/3b2baa070de8-application-security-appsec-engineer",
+    "published_date": "2026-08-26T11:46:52.940Z",
+    "type": {
+      "id": "fullTime",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "name": "Portugal",
+        "id": "PT"
+      },
+      "city": "Lisbon",
+      "primary": true,
+      "is_remote": false,
+      "name": "Lisbon, PT",
+      "id": "bae5b60881f1"
+    },
+    "department": "Joom",
+    "salary": "",
+    "company": {
+      "name": "Joom",
+      "logo_url": "https://gallery-cdn.breezy.hr/f427dc0c-be5d-4597-b36a-2ace99f83c48/rewrwewjoom-logo-j.png",
+      "friendly_id": "joom-group",
+      "isMultipleLocationsEnabled": false
+    },
+    "locations": [
+      {
+        "country": {
+          "name": "Portugal",
+          "id": "PT"
+        },
+        "city": "Lisbon",
+        "primary": true,
+        "is_remote": false,
+        "name": "Lisbon, PT",
+        "id": "bae5b60881f1"
+      }
+    ]
+  },
+  {
+    "id": "4153acbd3e7c",
+    "friendly_id": "4153acbd3e7c-business-development-manager-m-w-x-at-onfy",
+    "name": "Business Development Manager (m/w/x) at Onfy",
+    "url": "https://joom-group.breezy.hr/p/4153acbd3e7c-business-development-manager-m-w-x-at-onfy",
+    "published_date": "2026-09-09T10:34:08.967Z",
+    "type": {
+      "id": "fullTime",
+      "name": "Vollzeit"
+    },
+    "location": {
+      "country": {
+        "name": "Deutschland",
+        "id": "DE"
+      },
+      "city": "Berlin",
+      "primary": true,
+      "is_remote": true,
+      "remote_details": {
+        "value": "hybrid",
+        "label": "Hybrid (Some remote, some in person)"
+      },
+      "name": "Berlin, DE",
+      "id": "1b06d90f1d82"
+    },
+    "department": null,
+    "salary": "",
+    "company": {
+      "name": "Joom",
+      "logo_url": "https://gallery-cdn.breezy.hr/f427dc0c-be5d-4597-b36a-2ace99f83c48/rewrwewjoom-logo-j.png",
+      "friendly_id": "joom-group",
+      "isMultipleLocationsEnabled": false
+    },
+    "locations": [
+      {
+        "country": {
+          "name": "Deutschland",
+          "id": "DE"
+        },
+        "city": "Berlin",
+        "primary": true,
+        "is_remote": true,
+        "remote_details": {
+          "value": "hybrid",
+          "label": "Hybrid (Some remote, some in person)"
+        },
+        "name": "Berlin, DE",
+        "id": "1b06d90f1d82"
+      }
+    ]
+  },
+  {
+    "id": "df9b90d18230",
+    "friendly_id": "df9b90d18230-lead-backend-developer-go",
+    "name": "Lead Backend Developer (Go)",
+    "url": "https://joom-group.breezy.hr/p/df9b90d18230-lead-backend-developer-go",
+    "published_date": "2026-09-23T16:20:15.061Z",
+    "type": {
+      "id": "fullTime",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "name": "Portugal",
+        "id": "PT"
+      },
+      "city": "Lisbon",
+      "primary": true,
+      "is_remote": false,
+      "name": "Lisbon, PT",
+      "id": "ba95b6652be4"
+    },
+    "department": "Joom",
+    "salary": "",
+    "company": {
+      "name": "Joom",
+      "logo_url": "https://gallery-cdn.breezy.hr/f427dc0c-be5d-4597-b36a-2ace99f83c48/rewrwewjoom-logo-j.png",
+      "friendly_id": "joom-group",
+      "isMultipleLocationsEnabled": false
+    },
+    "locations": [
+      {
+        "country": {
+          "name": "Portugal",
+          "id": "PT"
+        },
+        "city": "Lisbon",
+        "primary": true,
+        "is_remote": false,
+        "name": "Lisbon, PT",
+        "id": "ba95b6652be4"
+      }
+    ]
+  },
+  {
+    "id": "fe927632328f",
+    "friendly_id": "fe927632328f-senior-ml-engineer",
+    "name": "Senior ML Engineer",
+    "url": "https://joom-group.breezy.hr/p/fe927632328f-senior-ml-engineer",
+    "published_date": "2026-11-05T17:03:28.289Z",
+    "type": {
+      "id": "fullTime",
+      "name": "Full-Time"
+    },
+    "location": {
+      "id": "deb8612e9f06",
+      "country": {
+        "name": "Portugal",
+        "id": "PT"
+      },
+      "city": "Lisbon",
+      "primary": true,
+      "is_remote": false,
+      "name": "Lisbon, PT"
+    },
+    "department": "",
+    "salary": "",
+    "company": {
+      "name": "Joom",
+      "logo_url": "https://gallery-cdn.breezy.hr/f427dc0c-be5d-4597-b36a-2ace99f83c48/rewrwewjoom-logo-j.png",
+      "friendly_id": "joom-group",
+      "isMultipleLocationsEnabled": false
+    },
+    "locations": [
+      {
+        "id": "deb8612e9f06",
+        "country": {
+          "name": "Portugal",
+          "id": "PT"
+        },
+        "city": "Lisbon",
+        "primary": true,
+        "is_remote": false,
+        "name": "Lisbon, PT"
+      }
+    ]
+  },
+  {
+    "id": "eb4507ce63da",
+    "friendly_id": "eb4507ce63da-top-tier-software-engineer",
+    "name": "Top-tier Software Engineer",
+    "url": "https://joom-group.breezy.hr/p/eb4507ce63da-top-tier-software-engineer",
+    "published_date": "2026-07-13T14:52:09.538Z",
+    "type": {
+      "id": "fullTime",
+      "name": "Full-Time"
+    },
+    "location": {
+      "country": {
+        "name": "Portugal",
+        "id": "PT"
+      },
+      "city": "Lisbon",
+      "primary": true,
+      "is_remote": false,
+      "name": "Lisbon, PT",
+      "id": "bfef0fc6b9fb"
+    },
+    "department": null,
+    "salary": "",
+    "company": {
+      "name": "Joom",
+      "logo_url": "https://gallery-cdn.breezy.hr/f427dc0c-be5d-4597-b36a-2ace99f83c48/rewrwewjoom-logo-j.png",
+      "friendly_id": "joom-group",
+      "isMultipleLocationsEnabled": false
+    },
+    "locations": [
+      {
+        "country": {
+          "name": "Portugal",
+          "id": "PT"
+        },
+        "city": "Lisbon",
+        "primary": true,
+        "is_remote": false,
+        "name": "Lisbon, PT",
+        "id": "bfef0fc6b9fb"
+      }
+    ]
+  }
+]

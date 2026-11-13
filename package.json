@@ -1,0 +1,53 @@
+{
+  "name": "job-finder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Private Telegram job-alert bot on AWS serverless (see JOB-FINDER-PLAN-v3.md)",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:all": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "build": "sam build",
+    "deploy": "sam deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmedhesein1/Job-Hunt.git"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@aws-sdk/client-budgets": "3.1165.0",
+    "@aws-sdk/client-cloudwatch": "3.1165.0",
+    "@aws-sdk/client-cloudwatch-logs": "3.1165.0",
+    "@aws-sdk/client-dynamodb": "3.1165.0",
+    "@aws-sdk/client-freetier": "3.1165.0",
+    "@aws-sdk/client-lambda": "3.1165.0",
+    "@aws-sdk/client-sqs": "3.1165.0",
+    "@aws-sdk/client-ssm": "3.1165.0",
+    "@aws-sdk/lib-dynamodb": "3.1165.0",
+    "@aws-sdk/util-dynamodb": "3.996.9",
+    "fast-xml-parser": "5.12.0",
+    "node-html-parser": "9.0.5",
+    "playwright": "^1.65.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@sparticuz/chromium": "153.0.0",
+    "@types/aws-lambda": "8.10.164",
+    "@types/node": "^24.19.2",
+    "esbuild": "0.28.2",
+    "eslint": "10.14.0",
+    "playwright-core": "1.65.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vitest": "4.1.12"
+  }
+}

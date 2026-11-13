@@ -1,0 +1,120 @@
+{
+  "apiVersion": "2.2.19",
+  "documentationUrl": "https://jobi.cy/apidocs",
+  "friendlyNotice": "Thanks for using Jobicy API! Please ensure Jobicy is clearly credited with a direct link to the source, and all application buttons redirect to the original job URL provided in this feed. That’s all! You might be building something amazing, we wish you the best of luck!",
+  "jobCount": 5,
+  "lastUpdate": "2026-11-10T14:03:49+00:00",
+  "nextCursor": "AgAAAABq80-YAAAAAGrzAc0AAAAAAAJ1OU0zVhQkI8JYfGeOL2bNeSwvpjGOV7-iA1vhuPyR3yEvPwr5E7NCYjWdTmpY-S6TU5xPq6nO43zVWX7zJ2_HLWg",
+  "hasMore": true,
+  "appliedFilters": {
+    "count": 5,
+    "industry": "engineering"
+  },
+  "jobs": [
+    {
+      "id": 161153,
+      "url": "https://jobicy.com/jobs/161153-forward-deployed-engineer-singapore",
+      "jobSlug": "161153-forward-deployed-engineer-singapore",
+      "jobTitle": "Forward Deployed Engineer - Singapore",
+      "companyName": "Roboflow",
+      "companyLogo": "https://jobicy.com/data/server-nyc0409/galaxy/mercury/2026/06/8cd75e4b-221.webp",
+      "jobIndustry": [
+        "Software Engineering"
+      ],
+      "jobType": [
+        "Full-Time"
+      ],
+      "jobGeo": "Singapore",
+      "jobLevel": "Any",
+      "jobExcerpt": "Who We Are Our mission is to make the world programmable. Sight is one of the key ways we understand the world, and soon this will be true for the software we use, too. We’re building the tools, community, and resources needed to make the world programmable with artificial intelligence. Roboflow simplifies building and using&hellip;",
+      "jobDescription": "<h3><strong>Who We Are</strong></h3>\n<p>Our mission is to make the world programmable. Sight is one of the key ways we understand the world, and soon this will be true for the software we use, too.</p>\n<p>We’re building the tools, community, and resources needed to make the world programmable with artificial intelligence. <a href=\"https://jobicy.com/company/roboflow\" target=\"_blank\" rel=\"noopener\">Roboflow</a> simplifies building and using computer vision models. Today, over 1M+ developers, including those from half the Fortune 100, use Roboflow’s computer vision AI open source and hosted tools. That includes <u>counting cells</u> to accelerate cancer research, improving <u>construction site safety</u>, <u>digitizing floor plans</u>, <u>preserving coral reef populations</u>, <u>guiding drone flight</u>, and <u>much more</u>.</p>\n<p>Roboflow is supported by great customers and investors, having raised over 63 million from Y Combinator, Google Ventures, Craft Ventures, Sam Altman, Lachy Groom, amongst other leading software investors.</p>\n<p>Roboflowers are passionate builders who value ownership, accountability, and a bias toward action. We’re curious, hands-on with new tech, and prefer showing our work over talking about it. Many of us have a founder mindset and thrive in our high-autonomy environment.</p>\n\n<h3><strong>What You’ll Do</strong></h3>\n<p>We’re hiring Forward Deployed Engineers (FDEs) to be the first technical hands on our new customer’s Roboflow deployments. Afte…",
+      "pubDate": "2026-11-10T14:03:49+00:00"
+    },
+    {
+      "id": 161147,
+      "url": "https://jobicy.com/jobs/161147-senior-reliability-engineer",
+      "jobSlug": "161147-senior-reliability-engineer",
+      "jobTitle": "Senior Reliability Engineer",
+      "companyName": "Halter",
+      "companyLogo": "https://jobicy.com/data/server-nyc0409/galaxy/mercury/2025/06/fe337305-221.png",
+      "jobIndustry": [
+        "QA & Testing"
+      ],
+      "jobType": [
+        "Full-Time"
+      ],
+      "jobGeo": "New Zealand",
+      "jobLevel": "Senior",
+      "jobExcerpt": "About Halter At Halter, we’re on a mission to enable farmers and graziers to run the most productive and sustainable operations. Our customers are using Halter to break free from the time-intensive constraints of conventional practices. Imagine watching 500 cattle stand up and walk calmly towards their next break? No quad bikes, no dogs, no&hellip;",
+      "jobDescription": "<h3><strong>About <a href=\"https://jobicy.com/company/halter\" target=\"_blank\" rel=\"noopener\">Halter</a></strong></h3>\n<p>At Halter, we’re on a mission to enable farmers and graziers to run the most productive and sustainable operations. Our customers are using Halter to break free from the time-intensive constraints of conventional practices. Imagine watching 500 cattle stand up and walk calmly towards their next break? No quad bikes, no dogs, no fences. Just a group of cattle walking at their own pace. People say it looks like magic. Our customers are revolutionizing grazing with Halter. It's changing lives and transforming an industry. People join Halter to do meaningful work. By joining us you’ll be solving challenging problems within a talented team and a culture built for high performance. Our team out-think, out-work and out-care. We’re committed to delivering real change in the world - this isn’t easy, and in truth, we love that it’s hard. </p>\n<p>We’re backed to deliver on a mission that matters by Tier 1 investors including <a href=\"https://foundersfund.com\" rel=\"nofollow ugc noopener\" target=\"_blank\">Founders Fund</a>, <a href=\"https://www.bvp.com/\" rel=\"nofollow ugc noopener\" target=\"_blank\"><u>Bessemer Venture Partners</u></a>, <a href=\"https://www.bondcap.com/\" rel=\"nofollow ugc noopener\" target=\"_blank\">BOND,</a> <a href=\"https://www.dcvc.com/\" rel=\"nofollow ugc noopener\" target=\"_blank\"><u>DCVC</u></a>, <a href=\"https://www.blackbird.vc/\" rel=\"nofollow ugc noop…",
+      "pubDate": "2026-11-10T14:03:09+00:00"
+    },
+    {
+      "id": 161091,
+      "url": "https://jobicy.com/jobs/161091-solutions-architect-5",
+      "jobSlug": "161091-solutions-architect-5",
+      "jobTitle": "Solutions Architect",
+      "companyName": "Orkes",
+      "companyLogo": "https://jobicy.com/data/server-nyc0409/galaxy/mercury/2026/11/71ddcab7b4b8-221.webp",
+      "jobIndustry": [
+        "Software Engineering"
+      ],
+      "jobType": [
+        "Full-Time"
+      ],
+      "jobGeo": "Europe",
+      "jobLevel": "Senior",
+      "jobExcerpt": "Who We Are Building the Backbone of Distributed Applications. Orkes is building the platform that powers the next generation of enterprise applications and AI systems. Founded by the creators of the open-source Netflix Conductor orchestration platform, Orkes helps organizations build, deploy, and operate mission-critical workflows and AI agents at massive scale. Our platform combines workflow&hellip;",
+      "jobDescription": "<p><strong>Who We Are</strong></p>\n<p><strong>Building the Backbone of Distributed Applications.</strong></p>\n<p><a href=\"https://jobicy.com/company/orkes\" target=\"_blank\" rel=\"noopener\">Orkes</a> is building the platform that powers the next generation of enterprise applications and AI systems. Founded by the creators of the open-source Netflix Conductor orchestration platform, Orkes helps organizations build, deploy, and operate mission-critical workflows and AI agents at massive scale. Our platform combines workflow and agent orchestration, integrations, observability, and resilience into a unified developer experience, enabling teams to build and operate complex deterministic and agentic workflows with confidence. From global enterprises to fast-growing startups, customers rely on Orkes to automate business-critical processes and execute billions of workflow and agent executions with the reliability, visibility, and fault tolerance required for production systems.</p>\n<p>We’re solving some of the hardest infrastructure problems: how do you make distributed systems reliable, observable, and scalable – without every team having to reinvent the wheel? We absorb the complexity of distributed systems, letting teams build with confidence.</p>\n<p>We’re hiring a <strong>Solutions Architect</strong> to help us evolve and scale our platform. If you’re passionate about clean, efficient architecture, love solving tough distributed systems challenges, and thrive in an environment wher…",
+      "pubDate": "2026-11-10T11:51:18+00:00",
+      "salaryMin": 80000,
+      "salaryMax": 180000,
+      "salaryCurrency": "USD",
+      "salaryPeriod": "yearly"
+    },
+    {
+      "id": 161089,
+      "url": "https://jobicy.com/jobs/161089-quality-assurance-engineer-remote-europe",
+      "jobSlug": "161089-quality-assurance-engineer-remote-europe",
+      "jobTitle": "Quality Assurance Engineer - Remote Europe",
+      "companyName": "Reedsy",
+      "companyLogo": "https://jobicy.com/data/server-nyc0409/galaxy/mercury/2026/11/e158be7d0de8-221.webp",
+      "jobIndustry": [
+        "QA & Testing"
+      ],
+      "jobType": [
+        "Full-Time"
+      ],
+      "jobGeo": "Europe",
+      "jobLevel": "Any",
+      "jobExcerpt": "We welcome applicants based anywhere in Europe. About Reedsy We’re here to give authors the tools and resources they need to create beautiful books. Our marketplace gathers the industry's best publishing professionals — the likes of Neil Gaiman's editor, Nora Roberts' book marketer, and GRRM’s cover designer. We’ve grown to a community of 5,000,000 authors,&hellip;",
+      "jobDescription": "<p><em>We welcome applicants based anywhere in Europe.</em></p>\n<h3><strong>About <a href=\"https://jobicy.com/company/reedsy\" target=\"_blank\" rel=\"noopener\">Reedsy</a></strong></h3>\n<p>We’re here to give authors the tools and resources they need to create beautiful books. Our marketplace gathers the industry's best publishing professionals — the likes of Neil Gaiman's editor, Nora Roberts' book marketer, and GRRM’s cover designer.</p>\n<p>We’ve grown to a community of 5,000,000 authors, and transformed the way people write and publish their book. Want to hop on board and help us get to our next destination? Cool, keep reading!</p>\n<h3><strong>Responsibilities</strong></h3>\n<p>As a Quality Assurance Engineer at Reedsy, you will work closely with our development and product teams to make sure our software meets high-quality standards.</p>\n<ul>\n<li>\n<p>Manually test across different platforms and devices and validate new features;</p>\n</li>\n<li>\n<p>Flag visual elements or functionality that could be improved;</p>\n</li>\n<li>\n<p>Contribute to creating a consistent user experience across our apps;</p>\n</li>\n<li>\n<p>Perform regression testing on existing features;</p>\n</li>\n<li>\n<p>Write and maintain automated end-to-end testing; and</p>\n</li>\n<li>\n<p>Triage user-reported bugs: capturing reproduction steps; writing failing tests; and communicating these issues with the development team.</p>\n</li>\n</ul>\n<h3><strong>Requirements</strong></h3>\n<ul>\n<li>\n<p>5+ years of professional exper…",
+      "pubDate": "2026-11-10T11:51:15+00:00",
+      "salaryMin": 40000,
+      "salaryMax": 50000,
+      "salaryCurrency": "EUR",
+      "salaryPeriod": "yearly"
+    },
+    {
+      "id": 161081,
+      "url": "https://jobicy.com/jobs/161081-ai-content-specialist",
+      "jobSlug": "161081-ai-content-specialist",
+      "jobTitle": "AI Content Specialist",
+      "companyName": "Firework",
+      "companyLogo": "https://jobicy.com/data/server-nyc0409/galaxy/mercury/2026/11/70ffd1e7b581-221.webp",
+      "jobIndustry": [
+        "QA & Testing"
+      ],
+      "jobType": [
+        "Full-Time"
+      ],
+      "jobGeo": "Philippines",
+      "jobLevel": "Senior",
+      "jobExcerpt": "About Firework Join Firework – Where Innovation Meets Impact Firework is redefining the future of commerce as an AI and video commerce company — combining cutting-edge technology, an exclusive network of enterprise brands and retailers, and a first-mover position to win the agentic commerce race. We've built the world's most advanced and largest video commerce&hellip;",
+      "jobDescription": "<p><strong>About <a href=\"https://jobicy.com/company/firework\" target=\"_blank\" rel=\"noopener\">Firework</a></strong></p>\n<p>Join Firework – Where Innovation Meets Impact</p>\n<p>Firework is redefining the future of commerce as an AI and video commerce company — combining cutting-edge technology, an exclusive network of enterprise brands and retailers, and a first-mover position to win the agentic commerce race.</p>\n<p>We've built the world's most advanced and largest video commerce platform, trusted by global brands and leading retailers. But we're more than software — our compounding network effect grows stronger with every partner we add, bringing the energy of in-store experiences online and transforming how businesses engage, convert, and build lasting customer relationships at scale.</p>\n<p>Having raised over $235M to date, led by investors such as SoftBank Vision Fund 2, and operating at global scale, we offer unparalleled opportunities to solve complex challenges and drive meaningful impact in the future of connected commerce.</p>\n<p>If you're curious, ambitious, and energized by big ideas — Firework is the place to grow, lead, and shape what comes next. Together.</p>\n<p><strong>Summary</strong></p>\n<p>We are seeking a detail-oriented AI Content Specialist to support the creation, review, quality assurance, and delivery of AI-generated content for our customers. This role will play a critical part in ensuring that AI-generated images and videos meet our standards for pro…",
+      "pubDate": "2026-11-10T11:36:45+00:00"
+    }
+  ],
+  "statusCode": 200,
+  "success": true
+}

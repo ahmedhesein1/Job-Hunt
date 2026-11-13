@@ -1,0 +1,190 @@
+{
+  "exhaustive": {
+    "nbHits": true,
+    "typo": true
+  },
+  "exhaustiveNbHits": true,
+  "exhaustiveTypo": true,
+  "hits": [
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "kat_marq"
+        },
+        "comment_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Epsilon |Hybrid (Chicago, IL) | Full time | $150-$160K USD<p>Hello everyone, Epsilon is hiring for a Lead Software Engineer. This is a hybrid role working out of our downtown Chicago office. Looking for backend/API development as well as data engineering experience.<p>Apply here: <a href=\"https://careers.publicisgroupe.com/epsilon/jobs/151072?lang=en-us&amp;previousLocale=en-US\" rel=\"nofollow\">https://careers.publicisgroupe.com/epsilon/jobs/151072?lang=...</a>"
+        },
+        "story_title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Who is hiring? (November 2026)"
+        }
+      },
+      "_tags": [
+        "comment",
+        "author_kat_marq",
+        "story_50338728"
+      ],
+      "author": "kat_marq",
+      "comment_text": "Epsilon |Hybrid (Chicago, IL) | Full time | $150-$160K USD<p>Hello everyone, Epsilon is hiring for a Lead Software Engineer. This is a hybrid role working out of our downtown Chicago office. Looking for backend&#x2F;API development as well as data engineering experience.<p>Apply here: <a href=\"https:&#x2F;&#x2F;careers.publicisgroupe.com&#x2F;epsilon&#x2F;jobs&#x2F;151072?lang=en-us&amp;previousLocale=en-US\" rel=\"nofollow\">https:&#x2F;&#x2F;careers.publicisgroupe.com&#x2F;epsilon&#x2F;jobs&#x2F;151072?lang=...</a>",
+      "created_at": "2026-11-10T15:11:57Z",
+      "created_at_i": 1794323517,
+      "objectID": "50441512",
+      "parent_id": 50338728,
+      "story_id": 50338728,
+      "story_title": "Ask HN: Who is hiring? (November 2026)",
+      "updated_at": "2026-11-10T15:14:26Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "playfair11"
+        },
+        "comment_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Polymath | Founding MTS, Full-Stack | San Francisco | ONSITE (5 days) | $160K–$220K + 0.75%–1.5% equity | <a href=\"https://polymathmade.com\" rel=\"nofollow\">https://polymathmade.com</a><p>Polymath builds AI agents that read engineering drawings, generate CAD models, and rebuild parts across CAD systems. We're VC-backed, Harvard- and Stanford-founded, in production with our first product, and running pilots with Fortune 100 manufacturers in aerospace and consumer hardware.<p>We're hiring our first dedicated full-stack engineer to own the product stack end to end: the chat UIs inside CAD (TypeScript/React over MCP and REST), the Python/FastAPI services behind them (auth, job orchestration, metered billing with Auth0 and Stripe), and the pipeline that packages and deploys it all. You report to the CEO, join customer calls, and set the standards for the next ten hires.<p>Looking for: 5+ years running production web apps with ownership across front end, API, and deployment; prior early-stage experience (first 50 engineers somewhere); TypeScript and Python; shipped on AWS or GCP with Terraform/CloudFormation and Kubernetes/ECS/Cloud Run. Nice to have: LLM product ops, enterprise SSO, C#/C++ desktop packaging, any CAD or mech-eng curiosity.<p>Must be authorized to work in the U.S. Immediate start.<p>Apply: email careers@polymathmade.com with a resume, a GitHub or portfolio link if you have one, and a few sentences on a system you built and ran in production. I read every application …"
+        },
+        "story_title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Who is hiring? (November 2026)"
+        }
+      },
+      "_tags": [
+        "comment",
+        "author_playfair11",
+        "story_50338728"
+      ],
+      "author": "playfair11",
+      "comment_text": "Polymath | Founding MTS, Full-Stack | San Francisco | ONSITE (5 days) | $160K–$220K + 0.75%–1.5% equity | <a href=\"https:&#x2F;&#x2F;polymathmade.com\" rel=\"nofollow\">https:&#x2F;&#x2F;polymathmade.com</a><p>Polymath builds AI agents that read engineering drawings, generate CAD models, and rebuild parts across CAD systems. We&#x27;re VC-backed, Harvard- and Stanford-founded, in production with our first product, and running pilots with Fortune 100 manufacturers in aerospace and consumer hardware.<p>We&#x27;re hiring our first dedicated full-stack engineer to own the product stack end to end: the chat UIs inside CAD (TypeScript&#x2F;React over MCP and REST), the Python&#x2F;FastAPI services behind them (auth, job orchestration, metered billing with Auth0 and Stripe), and the pipeline that packages and deploys it all. You report to the CEO, join customer calls, and set the standards for the next ten hires.<p>Looking for: 5+ years running production web apps with ownership across front end, API, and deployment; prior early-stage experience (first 50 engineers somewhere); TypeScript and Python; shipped on AWS or GCP with Terraform&#x2F;CloudFormation and Kubernetes&#x2F;ECS&#x2F;Cloud Run. Nice to have: LLM product ops, enterprise SSO, C#&#x2F;C++ desktop packaging, any CAD or mech-eng curiosity.<p>Must be authorized to work in the U.S. Immediate start.<p>Apply: email careers@polymathmade.com with a resume, a GitHub or portfolio link if you have one, and a few sentences on a syste…",
+      "created_at": "2026-11-09T22:07:39Z",
+      "created_at_i": 1794262059,
+      "objectID": "50432950",
+      "parent_id": 50338728,
+      "story_id": 50338728,
+      "story_title": "Ask HN: Who is hiring? (November 2026)",
+      "updated_at": "2026-11-09T22:11:38Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "RamiroZapaia"
+        },
+        "comment_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "www.ramirozapaia.com"
+        },
+        "story_title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Who is hiring? (November 2026)"
+        }
+      },
+      "_tags": [
+        "comment",
+        "author_RamiroZapaia",
+        "story_50338728"
+      ],
+      "author": "RamiroZapaia",
+      "comment_text": "www.ramirozapaia.com",
+      "created_at": "2026-11-10T00:48:13Z",
+      "created_at_i": 1794271693,
+      "objectID": "50434627",
+      "parent_id": 50353641,
+      "story_id": 50338728,
+      "story_title": "Ask HN: Who is hiring? (November 2026)",
+      "updated_at": "2026-11-10T00:54:08Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "onyeagbaLilian"
+        },
+        "comment_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Who's hiring a customer success, guide onboarding specialist and account management roles remotely in US UK and other European countries, Netherlands Germany or even worldwide"
+        },
+        "story_title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Who is hiring? (November 2026)"
+        }
+      },
+      "_tags": [
+        "comment",
+        "author_onyeagbaLilian",
+        "story_50338728"
+      ],
+      "author": "onyeagbaLilian",
+      "comment_text": "Who&#x27;s hiring a customer success, guide onboarding specialist and account management roles remotely in US UK and other European countries, Netherlands Germany or even worldwide",
+      "created_at": "2026-11-10T07:09:32Z",
+      "created_at_i": 1794294572,
+      "objectID": "50437037",
+      "parent_id": 50338728,
+      "story_id": 50338728,
+      "story_title": "Ask HN: Who is hiring? (November 2026)",
+      "updated_at": "2026-11-10T10:01:08Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "josecodea"
+        },
+        "comment_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "What's the official domain for your product? I couldn't find it on google."
+        },
+        "story_title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Who is hiring? (November 2026)"
+        }
+      },
+      "_tags": [
+        "comment",
+        "author_josecodea",
+        "story_50338728"
+      ],
+      "author": "josecodea",
+      "comment_text": "What&#x27;s the official domain for your product? I couldn&#x27;t find it on google.",
+      "created_at": "2026-11-10T00:00:44Z",
+      "created_at_i": 1794268844,
+      "objectID": "50434194",
+      "parent_id": 50428062,
+      "story_id": 50338728,
+      "story_title": "Ask HN: Who is hiring? (November 2026)",
+      "updated_at": "2026-11-10T00:01:39Z"
+    }
+  ],
+  "hitsPerPage": 8,
+  "nbHits": 325,
+  "nbPages": 41,
+  "page": 0,
+  "params": "tags=comment%2Cstory_50338728&numericFilters=created_at_i%3E1793635297&hitsPerPage=8&advancedSyntax=true&analyticsTags=backend",
+  "processingTimeMS": 1,
+  "processingTimingsMS": {
+    "_request": {
+      "queue": 5,
+      "roundTrip": 21
+    },
+    "total": 0
+  },
+  "query": "",
+  "serverTimeMS": 6
+}

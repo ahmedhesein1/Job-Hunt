@@ -1,0 +1,72 @@
+name: test-and-deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local:3.3.2
+        ports: ['8000:8000']
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - name: Integration tests (DynamoDB Local)
+        run: npm run test:integration
+        env:
+          DYNAMODB_ENDPOINT: http://localhost:8000
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write # OIDC: no long-lived AWS keys in GitHub (§3)
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: aws-actions/setup-sam@v3
+        with:
+          use-installer: true
+      - uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: sam validate --lint
+      # Through npm so SAM finds the pinned project esbuild in node_modules/.bin.
+      - run: npm run build
+      - name: sam deploy
+        run: >
+          npm run deploy -- --no-confirm-changeset --no-fail-on-empty-changeset
+          --s3-bucket "${{ vars.SAM_ARTIFACT_BUCKET }}"
+          --parameter-overrides
+          TelegramChatId="${{ vars.TELEGRAM_CHAT_ID }}"
+          AlarmEmail="${{ vars.ALARM_EMAIL }}"
+          UserAgentContact="${{ vars.USER_AGENT_CONTACT }}"
+          GmailEnabled="${{ vars.GMAIL_ENABLED || 'false' }}"
+          SenderReservedConcurrency="${{ vars.SENDER_RESERVED_CONCURRENCY || '1' }}"

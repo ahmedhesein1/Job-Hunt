@@ -1,0 +1,21 @@
+# SAM CLI configuration. Region and parameter values are supplied on first deploy with
+# `sam deploy --guided` (written to this file) or by CI. One region only (§14).
+version = 0.1
+
+[default.global.parameters]
+stack_name = "job-finder"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+fail_on_empty_changeset = false
+# Artifact bucket with a lifecycle rule from scripts/bootstrap.yaml (§14). Set it with
+# `sam deploy --guided` or --s3-bucket; avoid resolve_s3 (no lifecycle policy).
+s3_prefix = "job-finder"

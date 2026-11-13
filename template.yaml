@@ -1,0 +1,728 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Job Finder — private Telegram job-alert bot (JOB-FINDER-PLAN-v3.md).
+  Lambda + DynamoDB (provisioned, no auto scaling) + EventBridge Scheduler + SQS FIFO.
+  No VPC, no NAT Gateway, no RDS/Redis, no paid services.
+
+Parameters:
+  TelegramChatId:
+    Type: String
+    Description: The one private chat ID the bot serves (§11).
+    AllowedPattern: '^-?[0-9]+$'
+  TelegramBotTokenParam:
+    Type: String
+    Default: /jobfinder/telegram/bot-token
+    Description: SSM SecureString parameter holding the bot token.
+  TelegramWebhookSecretParam:
+    Type: String
+    Default: /jobfinder/telegram/webhook-secret
+    Description: SSM SecureString parameter holding the webhook secret_token.
+  GmailOAuthParam:
+    Type: String
+    Default: /jobfinder/gmail/oauth
+    Description: SSM SecureString with Gmail OAuth JSON {client_id, client_secret, refresh_token}.
+  GmailEnabled:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: Enable the 3-minute Gmail (LinkedIn alert email) schedule once OAuth credentials and parser fixtures exist (§12).
+  AlarmEmail:
+    Type: String
+    Description: Email address for critical CloudWatch alarms via SNS (§3 critical fallback).
+  UserAgentContact:
+    Type: String
+    Default: ''
+    Description: Optional contact for the honest User-Agent, e.g. mailto:you@example.com (§5.2).
+  SenderReservedConcurrency:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 1
+    Description: >
+      Reserved concurrency for the Telegram sender (§10.1). Set 0 only if the account's
+      concurrency limit is too low to reserve; the single FIFO message group still
+      serializes delivery.
+  BudgetName:
+    Type: String
+    Default: job-hunt
+    Description: Name of the EXISTING AWS budget that /cost reads (never created or modified by this stack).
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    AllowedValues: [7, 14]
+
+Conditions:
+  ReserveSenderConcurrency: !Not [!Equals [!Ref SenderReservedConcurrency, 0]]
+  GmailOn: !Equals [!Ref GmailEnabled, 'true']
+  HasUserAgentContact: !Not [!Equals [!Ref UserAgentContact, '']]
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Architectures: [arm64]
+    MemorySize: 256
+    Timeout: 30
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref JobsTable
+        TELEGRAM_CHAT_ID: !Ref TelegramChatId
+        TELEGRAM_BOT_TOKEN_PARAM: !Ref TelegramBotTokenParam
+        NOTIFICATION_QUEUE_URL: !Ref NotificationQueue
+        USER_AGENT_CONTACT: !If [HasUserAgentContact, !Ref UserAgentContact, !Ref AWS::NoValue]
+        LOG_LEVEL: info
+        STACK_NAME: !Ref AWS::StackName
+        GMAIL_ENABLED: !Ref GmailEnabled
+        NODE_OPTIONS: --enable-source-maps
+
+Resources:
+  # ---------------------------------------------------------------- data (§7)
+  JobsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: jobfinder
+      BillingMode: PROVISIONED
+      # §7.3: 15 RCU / 15 WCU configured in total, under the 25/25 always-free allowance.
+      ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      AttributeDefinitions:
+        - { AttributeName: PK, AttributeType: S }
+        - { AttributeName: SK, AttributeType: S }
+        - { AttributeName: GSI1PK, AttributeType: S }
+        - { AttributeName: GSI1SK, AttributeType: S }
+        - { AttributeName: GSI2PK, AttributeType: S }
+        - { AttributeName: GSI2SK, AttributeType: S }
+      KeySchema:
+        - { AttributeName: PK, KeyType: HASH }
+        - { AttributeName: SK, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - { AttributeName: GSI1PK, KeyType: HASH }
+            - { AttributeName: GSI1SK, KeyType: RANGE }
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              [jobId, sourceId, title, company, companyKey, score, confidence, applyUrl, sourceUrl,
+               remoteScope, skills, salary, summary, publishedAt, discoveredAt, via, userStatus, dismissReason]
+          ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+        - IndexName: GSI2
+          KeySchema:
+            - { AttributeName: GSI2PK, KeyType: HASH }
+            - { AttributeName: GSI2SK, KeyType: RANGE }
+          Projection: { ProjectionType: KEYS_ONLY }
+          ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+      StreamSpecification: { StreamViewType: NEW_IMAGE }
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+
+  # ---------------------------------------------------------------- queues (§10)
+  NotificationDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      MessageRetentionPeriod: 1209600
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      ContentBasedDeduplication: false
+      # ≥ 6 × sender timeout (AWS guidance for SQS event sources).
+      VisibilityTimeout: 90
+      MessageRetentionPeriod: 345600
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt NotificationDLQ.Arn
+        # Send-slot deferrals and Telegram 429s are returned via ChangeMessageVisibility
+        # and count as receives, so the budget is higher than the plan's example of 5.
+        maxReceiveCount: 10
+  StreamFailureQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - { Protocol: email, Endpoint: !Ref AlarmEmail }
+
+  # ---------------------------------------------------------------- log groups (§14: 7–14 days)
+  SyncSourceLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-sync-source', RetentionInDays: !Ref LogRetentionDays }
+  SyncBoardsLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-sync-company-boards', RetentionInDays: !Ref LogRetentionDays }
+  DispatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-dispatch-notification', RetentionInDays: !Ref LogRetentionDays }
+  SendLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-send-notification', RetentionInDays: !Ref LogRetentionDays }
+  ReconcileLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-reconcile-outbox', RetentionInDays: !Ref LogRetentionDays }
+  GmailLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-sync-gmail', RetentionInDays: !Ref LogRetentionDays }
+  DigestLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-digest', RetentionInDays: !Ref LogRetentionDays }
+  WebhookLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-telegram-webhook', RetentionInDays: !Ref LogRetentionDays }
+  MaintenanceLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-maintenance', RetentionInDays: !Ref LogRetentionDays }
+  LinkedInOrchestratorLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-linkedin-orchestrator', RetentionInDays: !Ref LogRetentionDays }
+
+  # ---------------------------------------------------------------- functions
+  SyncSourceFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: SyncSourceLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/sync-source.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sync-source'
+      CodeUri: .
+      Handler: sync-source.handler
+      MemorySize: 512
+      Timeout: 120
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchGetItem, dynamodb:BatchWriteItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+      Events:
+        # Source cadence (§4). Each source also enforces its own minimum interval in code.
+        Himalayas:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(15 6 * * ? *)
+            ScheduleExpressionTimezone: Africa/Cairo
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 5 }
+            Input: '{"sourceId":"himalayas"}'
+        RemoteOk:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(2 hours)
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 5 }
+            Input: '{"sourceId":"remoteok"}'
+        Jobicy:
+          Type: ScheduleV2
+          Properties:
+            # Never more often than hourly (Jobicy fair-use guidance).
+            ScheduleExpression: rate(65 minutes)
+            Input: '{"sourceId":"jobicy"}'
+        HackerNews:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 hour)
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 5 }
+            Input: '{"sourceId":"hn"}'
+        CareerPages:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(2 hours)
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 5 }
+            Input: '{"sourceId":"career-pages"}'
+        Wuzzuf:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(4 hours)
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 5 }
+            Input: '{"sourceId":"wuzzuf"}'
+
+  # Headless Chromium for JavaScript-only career pages (§5.7). x86_64: the Chromium build
+  # for Lambda ships x86_64 binaries. Only this function uses the layer.
+  BrowserLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata:
+      BuildMethod: nodejs24.x
+      BuildArchitecture: x86_64
+    Properties:
+      ContentUri: layers/browser
+      CompatibleRuntimes: [nodejs24.x]
+      CompatibleArchitectures: [x86_64]
+      RetentionPolicy: Delete
+
+  SyncRenderedPagesLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-sync-rendered-pages', RetentionInDays: !Ref LogRetentionDays }
+
+  SyncRenderedPagesFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: SyncRenderedPagesLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2024
+        Sourcemap: true
+        EntryPoints: [src/handlers/sync-rendered-pages.ts]
+        # Provided by BrowserLayer at runtime.
+        External: ['@sparticuz/chromium', 'playwright-core']
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sync-rendered-pages'
+      CodeUri: .
+      Handler: sync-rendered-pages.handler
+      Architectures: [x86_64]
+      MemorySize: 1600
+      Timeout: 180
+      Layers: [!Ref BrowserLayer]
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchGetItem, dynamodb:BatchWriteItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+      Events:
+        Tick:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(3 hours)
+            FlexibleTimeWindow: { Mode: FLEXIBLE, MaximumWindowInMinutes: 10 }
+
+  SyncCompanyBoardsFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: SyncBoardsLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/sync-company-boards.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sync-company-boards'
+      CodeUri: .
+      Handler: sync-company-boards.handler
+      MemorySize: 512
+      Timeout: 60
+      # Overlapping ticks are safe: every board is claimed with a conditional lease.
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchGetItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: !Sub '${JobsTable.Arn}/index/GSI2'
+      Events:
+        Tick:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(1 minute)
+
+  DispatchNotificationFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: DispatchLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/dispatch-notification.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-dispatch-notification'
+      CodeUri: .
+      Handler: dispatch-notification.handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:UpdateItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [sqs:SendMessage]
+              Resource: [!GetAtt NotificationQueue.Arn, !GetAtt StreamFailureQueue.Arn]
+      Events:
+        Outbox:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt JobsTable.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumRetryAttempts: 5
+            BisectBatchOnFunctionError: true
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            # Only INSERTs of notification outbox items (§10.1 step 2).
+            FilterCriteria:
+              Filters:
+                - Pattern: '{"eventName":["INSERT"],"dynamodb":{"NewImage":{"entity":{"S":["NOTIF"]}}}}'
+            DestinationConfig:
+              OnFailure:
+                Type: SQS
+                Destination: !GetAtt StreamFailureQueue.Arn
+
+  SendNotificationFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: SendLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/send-notification.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-send-notification'
+      CodeUri: .
+      Handler: send-notification.handler
+      Timeout: 15
+      ReservedConcurrentExecutions: !If [ReserveSenderConcurrency, !Ref SenderReservedConcurrency, !Ref AWS::NoValue]
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [sqs:ChangeMessageVisibility]
+              Resource: !GetAtt NotificationQueue.Arn
+            - Effect: Allow
+              Action: [ssm:GetParameter]
+              Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TelegramBotTokenParam}'
+      Events:
+        Queue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt NotificationQueue.Arn
+            BatchSize: 1
+            FunctionResponseTypes: [ReportBatchItemFailures]
+
+  ReconcileOutboxFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: ReconcileLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/reconcile-outbox.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-reconcile-outbox'
+      CodeUri: .
+      Handler: reconcile-outbox.handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:UpdateItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: !Sub '${JobsTable.Arn}/index/GSI2'
+            - Effect: Allow
+              Action: [sqs:SendMessage]
+              Resource: !GetAtt NotificationQueue.Arn
+      Events:
+        Tick:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(5 minutes)
+
+  SyncGmailFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: GmailLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/sync-gmail.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-sync-gmail'
+      CodeUri: .
+      Handler: sync-gmail.handler
+      Timeout: 120
+      Environment:
+        Variables:
+          GMAIL_OAUTH_PARAM: !Ref GmailOAuthParam
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchGetItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [ssm:GetParameter]
+              Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GmailOAuthParam}'
+      Events:
+        Tick:
+          Type: ScheduleV2
+          Properties:
+            # Owner requirement: LinkedIn coverage every 3 minutes (alert emails are the
+            # permitted automated route). One Gmail history call per tick.
+            ScheduleExpression: rate(3 minutes)
+            State: !If [GmailOn, ENABLED, DISABLED]
+
+  LinkedInOrchestratorFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: LinkedInOrchestratorLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/linkedin-orchestrator.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-linkedin-orchestrator'
+      CodeUri: .
+      Handler: linkedin-orchestrator.handler
+      MemorySize: 512
+      Timeout: 60
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchGetItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: [!GetAtt JobsTable.Arn, !Sub '${JobsTable.Arn}/index/*']
+      Events:
+        # Owner requirement: one schedule, one orchestrator, all saved searches every 3 min.
+        Cycle:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(3 minutes)
+
+  DigestFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: DigestLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/digest.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-digest'
+      CodeUri: .
+      Handler: digest.handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:BatchGetItem, dynamodb:UpdateItem, dynamodb:PutItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: !Sub '${JobsTable.Arn}/index/GSI2'
+      Events:
+        Morning:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 9 * * ? *)
+            ScheduleExpressionTimezone: Africa/Cairo
+        Evening:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 18 * * ? *)
+            ScheduleExpressionTimezone: Africa/Cairo
+
+  TelegramWebhookFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: WebhookLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/telegram-webhook.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-telegram-webhook'
+      CodeUri: .
+      Handler: telegram-webhook.handler
+      # Parsing an uploaded LinkedIn results page (up to 15 MB of HTML) needs the CPU share
+      # of 512 MB; ordinary commands are unaffected.
+      MemorySize: 512
+      Timeout: 20
+      Environment:
+        Variables:
+          TELEGRAM_WEBHOOK_SECRET_PARAM: !Ref TelegramWebhookSecretParam
+          MAINTENANCE_FUNCTION: !Ref MaintenanceFunction
+          NOTIFICATION_DLQ_URL: !Ref NotificationDLQ
+          STREAM_FAILURE_QUEUE_URL: !Ref StreamFailureQueue
+      FunctionUrlConfig:
+        # Telegram cannot sign requests with SigV4; authenticity is the secret_token
+        # header + chat ID check + update idempotency (§11).
+        AuthType: NONE
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:BatchGetItem, dynamodb:ConditionCheckItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: [!GetAtt JobsTable.Arn, !Sub '${JobsTable.Arn}/index/*']
+            - Effect: Allow
+              Action: [sqs:GetQueueAttributes]
+              Resource: [!GetAtt NotificationDLQ.Arn, !GetAtt StreamFailureQueue.Arn]
+            - Effect: Allow
+              Action: [lambda:InvokeFunction]
+              Resource: !GetAtt MaintenanceFunction.Arn
+            - Effect: Allow
+              Action: [ssm:GetParameter]
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TelegramBotTokenParam}'
+                - !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TelegramWebhookSecretParam}'
+
+  MaintenanceFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: MaintenanceLogs
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties: { Minify: true, Target: es2024, Sourcemap: true, EntryPoints: [src/handlers/maintenance.ts] }
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-maintenance'
+      CodeUri: .
+      Handler: maintenance.handler
+      MemorySize: 512
+      Timeout: 120
+      Environment:
+        Variables:
+          NOTIFICATION_DLQ_URL: !Ref NotificationDLQ
+          STREAM_FAILURE_QUEUE_URL: !Ref StreamFailureQueue
+          MONITORED_FUNCTIONS: !Sub '${AWS::StackName}-sync-source,${AWS::StackName}-sync-company-boards,${AWS::StackName}-dispatch-notification,${AWS::StackName}-send-notification,${AWS::StackName}-reconcile-outbox,${AWS::StackName}-sync-gmail,${AWS::StackName}-digest,${AWS::StackName}-telegram-webhook,${AWS::StackName}-sync-rendered-pages,${AWS::StackName}-linkedin-orchestrator'
+          ACCOUNT_ID: !Ref AWS::AccountId
+          BUDGET_NAME: !Ref BudgetName
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:BatchGetItem]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: [!GetAtt JobsTable.Arn, !Sub '${JobsTable.Arn}/index/*']
+            - Effect: Allow
+              Action: [sqs:GetQueueAttributes]
+              Resource: [!GetAtt NotificationDLQ.Arn, !GetAtt StreamFailureQueue.Arn]
+            - Effect: Allow
+              # §9 usage collection (read-only). These CloudWatch actions do not support
+              # resource-level permissions.
+              Action: [cloudwatch:GetMetricStatistics, cloudwatch:DescribeAlarms, cloudwatch:ListDashboards, logs:DescribeLogGroups]
+              Resource: '*'
+            - Effect: Allow
+              Action: [dynamodb:DescribeTable]
+              Resource: !GetAtt JobsTable.Arn
+            - Effect: Allow
+              Action: [lambda:GetFunctionConfiguration]
+              Resource: !Sub 'arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-*'
+            - Effect: Allow
+              Action: [budgets:ViewBudget]
+              Resource: !Sub 'arn:${AWS::Partition}:budgets::${AWS::AccountId}:budget/${BudgetName}'
+            - Effect: Allow
+              Action: [freetier:GetAccountPlanState]
+              Resource: '*'
+            - Effect: Allow
+              Action: [ssm:GetParameter]
+              Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TelegramBotTokenParam}'
+      Events:
+        # §9: collect the previous UTC day (and backfill missing days) shortly after midnight UTC.
+        DailyCost:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(20 0 * * ? *)
+            Input: '{"task":"cost"}'
+        DailyHealth:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(30 8 * * ? *)
+            ScheduleExpressionTimezone: Africa/Cairo
+            Input: '{"task":"health"}'
+        WeeklyReport:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 10 ? * FRI *)
+            ScheduleExpressionTimezone: Africa/Cairo
+            Input: '{"task":"weekly-report"}'
+        WeeklyBackup:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 11 ? * FRI *)
+            ScheduleExpressionTimezone: Africa/Cairo
+            Input: '{"task":"backup"}'
+
+  # ---------------------------------------------------------------- dashboard (§9, 39 metrics ≤ 50: free)
+  UsageDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub '${AWS::StackName}-usage'
+      DashboardBody: !Sub '{"widgets":[{"type":"text","x":0,"y":0,"width":24,"height":2,"properties":{"markdown":"## Job Finder — usage\nAWS-measured usage (no custom metrics). Cost projections and the budget are in Telegram `/cost`; projections are estimates, the bill is the budget actual. Free: ≤ 50 metrics on this dashboard."}},{"type":"metric","x":0,"y":2,"width":12,"height":6,"properties":{"title":"Lambda invocations (per hour)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/Lambda","Invocations","FunctionName","${AWS::StackName}-sync-source",{"stat":"Sum","label":"sync-source"}],["...","${AWS::StackName}-sync-company-boards",{"stat":"Sum","label":"sync-company-boards"}],["...","${AWS::StackName}-sync-rendered-pages",{"stat":"Sum","label":"sync-rendered-pages"}],["...","${AWS::StackName}-linkedin-orchestrator",{"stat":"Sum","label":"linkedin-orchestrator"}],["...","${AWS::StackName}-sync-gmail",{"stat":"Sum","label":"sync-gmail"}],["...","${AWS::StackName}-dispatch-notification",{"stat":"Sum","label":"dispatch-notification"}],["...","${AWS::StackName}-send-notification",{"stat":"Sum","label":"send-notification"}],["...","${AWS::StackName}-reconcile-outbox",{"stat":"Sum","label":"reconcile-outbox"}],["...","${AWS::StackName}-digest",{"stat":"Sum","label":"digest"}],["...","${AWS::StackName}-telegram-webhook",{"stat":"Sum","label":"telegram-webhook"}],["...","${AWS::StackName}-maintenance",{"stat":"Sum","label":"maintenance"}]]}},{"type":"metric","x":12,"y":2,"width":12,"height":6,"properties":{"title":"Lambda errors (per hour)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/Lambda","Errors","FunctionName","${AWS::StackName}-sync-source",{"stat":"Sum","label":"sync-source"}],["...","${AWS::StackName}-sync-company-boards",{"stat":"Sum","label":"sync-company-boards"}],["...","${AWS::StackName}-sync-rendered-pages",{"stat":"Sum","label":"sync-rendered-pages"}],["...","${AWS::StackName}-linkedin-orchestrator",{"stat":"Sum","label":"linkedin-orchestrator"}],["...","${AWS::StackName}-sync-gmail",{"stat":"Sum","label":"sync-gmail"}],["...","${AWS::StackName}-dispatch-notification",{"stat":"Sum","label":"dispatch-notification"}],["...","${AWS::StackName}-send-notification",{"stat":"Sum","label":"send-notification"}],["...","${AWS::StackName}-reconcile-outbox",{"stat":"Sum","label":"reconcile-outbox"}],["...","${AWS::StackName}-digest",{"stat":"Sum","label":"digest"}],["...","${AWS::StackName}-telegram-webhook",{"stat":"Sum","label":"telegram-webhook"}],["...","${AWS::StackName}-maintenance",{"stat":"Sum","label":"maintenance"}]]}},{"type":"metric","x":0,"y":8,"width":12,"height":6,"properties":{"title":"Lambda duration p95 (ms)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/Lambda","Duration","FunctionName","${AWS::StackName}-sync-company-boards",{"stat":"p95","label":"boards"}],["...","${AWS::StackName}-sync-source",{"stat":"p95","label":"sync-source"}],["...","${AWS::StackName}-sync-rendered-pages",{"stat":"p95","label":"rendered"}],["...","${AWS::StackName}-linkedin-orchestrator",{"stat":"p95","label":"linkedin"}]]}},{"type":"metric","x":12,"y":8,"width":12,"height":6,"properties":{"title":"DynamoDB capacity and throttles (per hour)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/DynamoDB","ConsumedReadCapacityUnits","TableName","${JobsTable}",{"stat":"Sum"}],[".","ConsumedWriteCapacityUnits",".",".",{"stat":"Sum"}],[".","ReadThrottleEvents",".",".",{"stat":"Sum"}],[".","WriteThrottleEvents",".",".",{"stat":"Sum"}]]}},{"type":"metric","x":0,"y":14,"width":12,"height":6,"properties":{"title":"SQS notification queue (per hour)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/SQS","NumberOfMessagesSent","QueueName","${NotificationQueue.QueueName}",{"stat":"Sum"}],[".","NumberOfEmptyReceives",".",".",{"stat":"Sum"}],[".","ApproximateAgeOfOldestMessage",".",".",{"stat":"Maximum"}],[".","ApproximateNumberOfMessagesVisible",".","${NotificationDLQ.QueueName}",{"stat":"Maximum","label":"DLQ visible"}],[".",".",".","${StreamFailureQueue.QueueName}",{"stat":"Maximum","label":"stream failures visible"}]]}},{"type":"metric","x":12,"y":14,"width":12,"height":6,"properties":{"title":"Scheduler and log ingestion (per hour)","region":"${AWS::Region}","view":"timeSeries","stacked":false,"period":3600,"metrics":[["AWS/Scheduler","InvocationAttemptCount",{"stat":"Sum"}],[".","TargetErrorCount",{"stat":"Sum"}],[".","InvocationDroppedCount",{"stat":"Sum"}],["AWS/Logs","IncomingBytes",{"stat":"Sum","yAxis":"right"}]]}}]}'
+
+  # ---------------------------------------------------------------- alarms (≤10 standard alarms)
+  NotificationDLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Telegram notifications reached the DLQ.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt NotificationDLQ.QueueName }]
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  StreamFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Outbox stream records failed dispatch.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt StreamFailureQueue.QueueName }]
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  SenderErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Telegram sender is failing (Telegram may be unreachable).
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref SendNotificationFunction }]
+      Statistic: Sum
+      Period: 900
+      EvaluationPeriods: 1
+      Threshold: 3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  WebhookErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Telegram webhook handler errors.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref TelegramWebhookFunction }]
+      Statistic: Sum
+      Period: 900
+      EvaluationPeriods: 1
+      Threshold: 3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  MaintenanceErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Health/report/backup task failed — the daily health report may not arrive.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref MaintenanceFunction }]
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  DynamoThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: DynamoDB throttling (capacity is fixed by design; investigate before raising it).
+      Namespace: AWS/DynamoDB
+      MetricName: WriteThrottleEvents
+      Dimensions: [{ Name: TableName, Value: !Ref JobsTable }]
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+
+Outputs:
+  WebhookUrl:
+    Description: Telegram webhook URL (use scripts/set-webhook.sh).
+    Value: !GetAtt TelegramWebhookFunctionUrl.FunctionUrl
+  TableName:
+    Value: !Ref JobsTable
+  NotificationQueueUrl:
+    Value: !Ref NotificationQueue
+  NotificationDLQUrl:
+    Value: !Ref NotificationDLQ
+  StreamFailureQueueUrl:
+    Value: !Ref StreamFailureQueue
+  SyncSourceFunctionName:
+    Value: !Ref SyncSourceFunction
+  MaintenanceFunctionName:
+    Value: !Ref MaintenanceFunction
+  UsageDashboardUrl:
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards/dashboard/${AWS::StackName}-usage'

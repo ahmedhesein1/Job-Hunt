@@ -1,0 +1,261 @@
+{
+  "comments": "Search results come 20 to a page. Pass ?page=2, ?page=3 and so on for more; there is no cursor on search. Cursor pagination (nextCursor) is only on /jobs/api, the browse feed. 13/03/2026: The API has been updated to include the companySlug field in the response.",
+  "updatedAt": 1793989512,
+  "offset": 0,
+  "limit": 20,
+  "totalCount": 5000,
+  "jobs": [
+    {
+      "title": "Lead Backend Developer",
+      "excerpt": "About the ClientOur client is a rapidly growing, technology-driven organization specializing in digital transformation and AI solutions.",
+      "companyName": "MindPlus (Pvt) Ltd",
+      "companySlug": "mindplus-pvt-ltd",
+      "companyLogo": "https://cdn-images.himalayas.app/cbvqpme9lj5c0qoe7o56fwpyf4pl",
+      "employmentType": "Full Time",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": [
+        "Senior"
+      ],
+      "currency": null,
+      "locationRestrictions": [
+        "Sri Lanka"
+      ],
+      "timezoneRestrictions": [
+        5.5
+      ],
+      "categories": [
+        "Lead-Backend-Developer",
+        "Python-Developer",
+        "Backend-Engineer",
+        "API-Developer",
+        "Software-Engineer",
+        "Lead-Backend-Development",
+        "Backend-Engineering-Lead",
+        "Tech-Lead-Backend",
+        "Lead-Backend-Engineering",
+        "Backend-Team-Lead",
+        "Principal-Backend-Developer",
+        "Senior-Backend-Development",
+        "Senior-Backend-Engineering"
+      ],
+      "parentCategories": [
+        "Developer"
+      ],
+      "description": "<h3>About the Client</h3><p>Our client is a rapidly growing, technology-driven organization specializing in digital transformation and AI solutions. With a strong global footprint across industries such as healthcare, education, and manufacturing, they leverage cutting-edge technologies and a remote-first approach to deliver innovative and scalable solutions.</p><h3>Job Overview</h3><p>We are looking for an experienced Lead Backend Developer – Python to drive the design, development, and delivery of scalable backend systems. This role requires strong technical expertise, leadership capabilities, and the ability to collaborate with cross-functional teams and clients to deliver high-quality, reliable solutions.</p><h3>Responsibilities</h3><ul>\n<li>Lead the design, development, and delivery of backend solutions using Python technologies.</li>\n<li>Analyze business and technical requirements to design and implement scalable backend services and APIs.</li>\n<li>Develop and maintain high-performance, secure, and reliable backend applications.</li>\n<li>Collaborate with frontend, QA, and DevOps teams to deliver end-to-end solutions.</li>\n<li>Provide technical leadership, including mentoring team members and guiding implementation approaches.</li>\n<li>Engage directly with clients to understand requirements, communicate progress, and ensure successful delivery.</li>\n<li>Conduct code reviews and enforce best practices in coding, architecture, and documentation.</li>\n<li>Optimize backend s…",
+      "pubDate": 1791305186,
+      "expiryDate": 1796489186,
+      "applicationLink": "https://himalayas.app/companies/mindplus-pvt-ltd/jobs/lead-backend-developer?utm_source=api",
+      "guid": "https://himalayas.app/companies/mindplus-pvt-ltd/jobs/lead-backend-developer"
+    },
+    {
+      "title": "Staff Software Engineer (Back-End)",
+      "excerpt": "Type: Full-time contractor Location: Remote (Europe/Africa time zones) Language: Fluent, professional-level English Travel: None expected OpenFn is a Digital Public Good for public service automation and AI orchestration.",
+      "companyName": "OpenFn",
+      "companySlug": "openfn",
+      "companyLogo": "https://cdn-images.himalayas.app/to5jtj92p9q3d28qdfrndq15gvwi",
+      "employmentType": "Contractor",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": [
+        "Senior"
+      ],
+      "currency": null,
+      "locationRestrictions": [
+        "South Africa"
+      ],
+      "timezoneRestrictions": [
+        2
+      ],
+      "categories": [
+        "Backend-Engineering",
+        "Software-Engineer",
+        "System-Integration",
+        "API-Development",
+        "backend-architecture",
+        "Staff-Backend-Software-Engineer",
+        "Staff-Software-Engineer-Backend",
+        "Staff-Backend-Engineer",
+        "Staff-Ruby-Backend-Engineer",
+        "Staff-Backend-Engineering"
+      ],
+      "parentCategories": [
+        "Developer"
+      ],
+      "description": "<p><strong>Type: </strong>Full-time contractor<br><strong>Location: </strong>Remote (Europe/Africa time zones)<br><strong>Language:</strong> Fluent, professional-level English<br><strong>Travel: </strong>None expected</p><p><a href=\"https://himalayas.app/companies/openfn\">OpenFn</a> is a Digital Public Good for public service automation and AI orchestration. Our platform automates data exchange and workflows, helping governments and NGOs connect fragmented systems and deliver essential services across health, humanitarian response, and government programmes.</p><p>Open Function Group, the platform’s primary steward, is a small, fully remote team of engineers, integration specialists, solution architects, and implementation consultants working across 15+ countries.</p><p>We build infrastructure that helps governments function, clinics operate, and people access the services they depend on. </p><h3>The role</h3><p>Connecting two government systems should get easier every time. Today, it often means starting again: negotiating access, configuring environments, and deciding who can trust whom. Each new connection becomes another project.<strong><br><br>We’re hiring a Staff Back-End Engineer to help change that. You’ll join our Connections squad, with a clear mission: make it dramatically cheaper for government departments to collaborate.</strong></p><p>Your work will turn the hard parts of each integration into capabilities teams can use again and again. You’ll define how organis…",
+      "pubDate": 1789294615,
+      "expiryDate": 1794478614,
+      "applicationLink": "https://himalayas.app/companies/openfn/jobs/staff-software-engineer-back-end?utm_source=api",
+      "guid": "https://himalayas.app/companies/openfn/jobs/staff-software-engineer-back-end"
+    },
+    {
+      "title": "Rust Architect / Backend Developer",
+      "excerpt": "Rust Architect / Backend DeveloperPay: $50–$70/hour Location: Global, fully remote Job Type: Contractor (~15 hours per week) Schedule: Flexible—you can choose the hours and days you work, including weekends if desired (As long as you're active) We are looking for a highly skilled Rust Architect / Backend Developer to contribute to an AI-training project involving production Rust, backend architecture, asynchronous and concurrent systems, service design, infrastructure, and technical debugging.",
+      "companyName": "micro1",
+      "companySlug": "micro1",
+      "companyLogo": "https://cdn-images.himalayas.app/91oa56akgt3qjqc1nh3uoruub40c",
+      "employmentType": "Contractor",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "hourly",
+      "seniority": [
+        "Senior",
+        "Director"
+      ],
+      "currency": "USD",
+      "locationRestrictions": [],
+      "timezoneRestrictions": [
+        -11,
+        -10,
+        -9.5,
+        -9,
+        -8,
+        -7,
+        -6,
+        -5,
+        -4,
+        -3.5,
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3,
+        3.5,
+        4,
+        4.5,
+        5,
+        5.5,
+        5.75,
+        6,
+        6.5,
+        7,
+        8,
+        8.75,
+        9,
+        9.5,
+        10,
+        10.5,
+        11,
+        12,
+        12.75,
+        13,
+        14
+      ],
+      "categories": [
+        "Senior-Backend-Rust-Engineer",
+        "Senior-Rust-Developer",
+        "Backend-Architect",
+        "Senior-Rust-Engineer",
+        "Backend-Software-Architect",
+        "Senior-DeFi-Rust-Engineer",
+        "Backend-Systems-Architect"
+      ],
+      "parentCategories": [],
+      "description": "<h3>Rust Architect / Backend Developer</h3><p><strong>Pay:</strong> $50–$70/hour</p><p><strong>Location:</strong> Global, fully remote</p><p><strong>Job Type:</strong> Contractor (~15 hours per week)</p><p><strong>Schedule:</strong> Flexible—you can choose the hours and days you work, including weekends if desired (As long as you're active)</p><p>We are looking for a highly skilled <strong>Rust Architect / Backend Developer</strong> to contribute to an AI-training project involving production Rust, backend architecture, asynchronous and concurrent systems, service design, infrastructure, and technical debugging. The role requires strong programming ability and the judgment to evaluate whether backend systems are correct, reliable, maintainable, and suitable for production use.</p><h3>Scope of Work</h3><ol>\n<li>Solve and validate Rust backend problems involving service behavior, APIs, persistence, concurrency, performance, and reliability.</li>\n<li>Translate functional requirements, performance targets, and failure-handling expectations into reproducible implementation and testing workflows.</li>\n<li>Prepare Rust crate workspaces, configuration files, test fixtures, dependency services, databases, and containerized environments.</li>\n</ol><h3>Preferred Qualifications</h3><ol>\n<li>Strong knowledge of Rust, backend service design, APIs, data systems, concurrency, and production software architecture.</li>\n<li>Experience formulating and completing technical analyses involving bac…",
+      "pubDate": 1792901119,
+      "expiryDate": 1798085118,
+      "applicationLink": "https://himalayas.app/companies/micro1/jobs/rust-architect-backend-developer?utm_source=api",
+      "guid": "https://himalayas.app/companies/micro1/jobs/rust-architect-backend-developer"
+    },
+    {
+      "title": "🚀 Senior Backend Engineer (Node.js / TypeScript)",
+      "excerpt": "Senior Backend Engineer (Node. js / TypeScript) We’re looking for experienced Senior Backend Engineers (4+ years) who can join immediately and are excited to work on a production-grade SaaS platform.",
+      "companyName": "One Tech Capital",
+      "companySlug": "one-tech-capital",
+      "companyLogo": "",
+      "employmentType": "Full Time",
+      "minSalary": null,
+      "maxSalary": null,
+      "salaryPeriod": "annual",
+      "seniority": [
+        "Senior"
+      ],
+      "currency": null,
+      "locationRestrictions": [
+        "Egypt",
+        "India",
+        "Pakistan"
+      ],
+      "timezoneRestrictions": [
+        2,
+        5,
+        5.5
+      ],
+      "categories": [
+        "Backend-Engineer",
+        "Node.Js-Engineer",
+        "Software-Engineer",
+        "Senior-TypeScript-Backend-Developer",
+        "Senior-Backend-Engineering",
+        "Senior-Node.Js-Engineer",
+        "Senior-Backend-Development",
+        "Remote-Senior-Backend-Engineer"
+      ],
+      "parentCategories": [
+        "Developer"
+      ],
+      "description": "<p>Senior Backend Engineer (Node.js / TypeScript)</p><p>We’re looking for experienced Senior Backend Engineers (4+ years) who can join immediately and are excited to work on a production-grade SaaS platform.</p><p>This is a full-time role only — we are not considering part-time, freelance, or multi-job setups.</p><h3>🔧 Must-Have Skills (Non-Negotiable)</h3><ul>\n<li>TypeScript + Node.js</li>\n<li>PostgreSQL</li>\n<li>Prisma</li>\n<li>GraphQL</li>\n<li>Strong backend fundamentals (performance, scalability, clean code)</li>\n</ul><h3>👤 Experience Requirements</h3><ul>\n<li>4+ years of backend development experience</li>\n<li>Hands-on experience building and maintaining production systems</li>\n<li>Comfortable working with modern backend architectures</li>\n<li>Able to take ownership of features and services end-to-end</li>\n</ul><h3>🌍 Preferred Locations</h3><ul>\n<li>Pakistan</li>\n<li>India</li>\n<li>Egypt</li>\n</ul><h3>(Remote, full-time)</h3><h3>⏱ Availability</h3><ul>\n<li>Immediate joiners only</li>\n<li>Team needs to be finalized within 3–4 days</li>\n</ul><p>If you have a notice period or ongoing commitments, this role is not a fit.</p><p>Originally posted on <a href=\"https://himalayas.app\">Himalayas</a></p>",
+      "pubDate": 1793533788,
+      "expiryDate": 1798091324,
+      "applicationLink": "https://himalayas.app/companies/one-tech-capital/jobs/senior-backend-engineer-node-js-typescript-9091066319?utm_source=api",
+      "guid": "https://himalayas.app/companies/one-tech-capital/jobs/senior-backend-engineer-node-js-typescript-9091066319"
+    },
+    {
+      "title": "Tech Lead — Backend Gaming Services Integrations",
+      "excerpt": "ABOUT YOUWe are seeking a Tech Lead to own the architecture, integrations, and technical direction for systems that bridge Xsolla’s platform with external backend gaming service providers.",
+      "companyName": "Xsolla",
+      "companySlug": "xsolla",
+      "companyLogo": "https://cdn-images.himalayas.app/7vgihn46xneh0fp0rtrhg9hq8m63",
+      "employmentType": "Full Time",
+      "minSalary": 90000,
+      "maxSalary": 100000,
+      "salaryPeriod": "annual",
+      "seniority": [
+        "Senior"
+      ],
+      "currency": "EUR",
+      "locationRestrictions": [
+        "Canada",
+        "France",
+        "Portugal",
+        "Spain"
+      ],
+      "timezoneRestrictions": [
+        -7,
+        -6,
+        -5,
+        -4,
+        -3.5,
+        -1,
+        0,
+        1
+      ],
+      "categories": [
+        "Backend-Development",
+        "Game-Development",
+        "Software-Architecture",
+        "Technical-Lead",
+        "Integration-Engineering",
+        "Backend-Engineering",
+        "Tech-Lead-Backend",
+        "Backend-Engineering-Lead",
+        "Lead-Backend-Developer",
+        "Lead-Backend-Engineering",
+        "Backend-Integrations-Engineer",
+        "Lead-Backend-Development"
+      ],
+      "parentCategories": [
+        "Developer"
+      ],
+      "description": "<h3>ABOUT YOU</h3><div>We are seeking a Tech Lead to own the architecture, integrations, and technical direction for systems that bridge <a href=\"https://himalayas.app/companies/xsolla\">Xsolla</a>’s platform with external backend gaming service providers.</div><div>This role requires strong technical leadership, deep understanding of game backend ecosystems, and the ability to design scalable integration workflows across multiple platforms. You will guide a team delivering high-impact features that unify services.</div><h3>ABOUT US</h3><div>\n<a href=\"https://himalayas.app/companies/xsolla\">Xsolla</a> is a global commerce company with robust tools and services to help developers solve the inherent challenges of the video game industry. From indie to AAA, companies partner with <a href=\"https://himalayas.app/companies/xsolla\">Xsolla</a> to help them fund, distribute, market, and monetize their games. Grounded in the belief in the future of video games, <a href=\"https://himalayas.app/companies/xsolla\">Xsolla</a> is resolute in the mission to bring opportunities together, and continually make new resources available to creators. Headquartered and incorporated in Los Angeles, California, <a href=\"https://himalayas.app/companies/xsolla\">Xsolla</a> operates as the merchant of record and has helped over 1,500+ game developers to reach more players and grow their businesses around the world. With more paths to profits and ways to win, developers have all the things needed to enjoy the…",
+      "pubDate": 1793989512,
+      "expiryDate": 1799173512,
+      "applicationLink": "https://himalayas.app/companies/xsolla/jobs/tech-lead-backend-gaming-services-integrations-9638344988?utm_source=api",
+      "guid": "https://himalayas.app/companies/xsolla/jobs/tech-lead-backend-gaming-services-integrations-9638344988"
+    }
+  ]
+}

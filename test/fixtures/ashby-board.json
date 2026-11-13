@@ -1,0 +1,1409 @@
+{
+  "jobs": [
+    {
+      "id": "7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "title": "Engineering Manager - EU",
+      "department": "Engineering",
+      "team": "EMEA Engineering",
+      "employmentType": "FullTime",
+      "location": "Remote - European Union",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "secondaryLocations": [
+        {
+          "location": "Spain",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Spain",
+              "addressCountry": "Spain",
+              "addressLocality": "Spain"
+            }
+          }
+        },
+        {
+          "location": "Italy",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Italy",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Germany",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Germany",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Switzerland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Switzerland",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Denmark",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Denmark",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Norway",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Norway",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Croatia",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Croatia",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Ireland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Ireland",
+              "addressCountry": "Ireland",
+              "addressLocality": "Ireland"
+            }
+          }
+        },
+        {
+          "location": "Stockholm",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Stockholm",
+              "addressCountry": "Sweden",
+              "addressLocality": "Stockholm"
+            }
+          }
+        },
+        {
+          "location": "Romania",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Romania",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Austria",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Austria"
+            }
+          }
+        },
+        {
+          "location": "Barcelona",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Catalonia",
+              "addressCountry": "Spain",
+              "addressLocality": "Barcelona"
+            }
+          }
+        },
+        {
+          "location": "Netherlands",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Netherlands",
+              "addressLocality": "Amsterdam"
+            }
+          }
+        },
+        {
+          "location": "Portugal",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Portugal"
+            }
+          }
+        },
+        {
+          "location": "France",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "France",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Berlin",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Germany",
+              "addressLocality": "Berlin"
+            }
+          }
+        },
+        {
+          "location": "Sweden",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Sweden",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Hungary",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Hungary",
+              "addressCountry": "Hungary",
+              "addressLocality": "Budapest"
+            }
+          }
+        },
+        {
+          "location": "Estonia",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Estonia",
+              "addressLocality": ""
+            }
+          }
+        }
+      ],
+      "publishedAt": "2024-03-04T14:29:08.532+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "postalCode": "",
+          "addressRegion": "",
+          "addressCountry": "European Union",
+          "addressLocality": ""
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/Ashby/7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "applyUrl": "https://jobs.ashbyhq.com/Ashby/7458d4e9-da2e-47bd-98cb-adfda43d42b2/application",
+      "descriptionHtml": "<p style=\"min-height:1.5em\">Hi 👋 I’m <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://uk.linkedin.com/in/colinhoweuk\"><u>Colin</u></a>, Director of Engineering, Europe. How do you feel about software engineers writing product specs, making product decisions, and not breaking down projects into individual tickets? If that sounds exciting (even if a bit scary), read on because I’m looking for an engineering manager to help us build a different type of engineering team and culture at Ashby.</p><p style=\"min-height:1.5em\">To start, why do we need to be different? Time and again, I have witnessed engineers knowing what needs to be done yet being unable to get things done because of “the process” or because “more data is needed.” Some of the most effective projects have been <em>skunkworks </em>projects, where engineers have taken total ownership of a problem and driven it to completion. I want to normalize that at Ashby.</p><p style=\"min-height:1.5em\">When we think about how these processes came about, we realize they carry a <em>pessimistic</em> mindset. They box people into smaller roles to minimize the chance of not meeting a certain standard. At Ashby. we’re building an environment that is <em>optimistic </em>about what engineers can own and achieve and embraces the innovative engineers (and frankly, often stays out of their way).</p><p style=\"min-height:1.5em\">To accomplish this, our engineering leaders need to think deeply about individual performance, pr…",
+      "descriptionPlain": "Hi 👋 I’m Colin https://uk.linkedin.com/in/colinhoweuk, Director of Engineering, Europe. How do you feel about software engineers writing product specs, making product decisions, and not breaking down projects into individual tickets? If that sounds exciting (even if a bit scary), read on because I’m looking for an engineering manager to help us build a different type of engineering team and culture at Ashby.\n\nTo start, why do we need to be different? Time and again, I have witnessed engineers knowing what needs to be done yet being unable to get things done because of “the process” or because “more data is needed.” Some of the most effective projects have been skunkworks projects, where engineers have taken total ownership of a problem and driven it to completion. I want to normalize that at Ashby.\n\nWhen we think about how these processes came about, we realize they carry a pessimistic mindset. They box people into smaller roles to minimize the chance of not meeting a certain standard. At Ashby. we’re building an environment that is optimistic about what engineers can own and achieve and embraces the innovative engineers (and frankly, often stays out of their way).\n\nTo accomplish this, our engineering leaders need to think deeply about individual performance, process, and culture - not running sprint planning or driving product and technical decisions. You’ll focus on building your team, their skills to thrive with the ownership they’re given, and an environment that empower…",
+      "compensation": {
+        "compensationTierSummary": "€150K – €250K • Offers Equity • Offers Bonus",
+        "scrapeableCompensationSalarySummary": "€150K - €250K",
+        "compensationTiers": [
+          {
+            "id": "f1284fac-20e9-4ed0-9a10-776d526a636c",
+            "tierSummary": "€150K – €250K • Offers Equity • Offers Bonus",
+            "title": "EU",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "04679796-e0e4-4d9b-a5c0-0cad3ff8ae95",
+                "summary": "Offers Bonus",
+                "compensationType": "Bonus",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "da741ab6-ff38-4fc2-b7b7-c1ccd7260347",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "201b8495-aa7c-417d-923b-94fced49b246",
+                "summary": "€150K – €250K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 150000,
+                "maxValue": 250000
+              }
+            ]
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "Bonus",
+            "interval": "1 YEAR",
+            "currencyCode": "EUR",
+            "minValue": null,
+            "maxValue": null
+          },
+          {
+            "compensationType": "EquityPercentage",
+            "interval": "NONE",
+            "currencyCode": null,
+            "minValue": null,
+            "maxValue": null
+          },
+          {
+            "compensationType": "Salary",
+            "interval": "1 YEAR",
+            "currencyCode": "EUR",
+            "minValue": 150000,
+            "maxValue": 250000
+          }
+        ]
+      }
+    },
+    {
+      "id": "86a60834-ba64-484d-9658-afa1bc97a957",
+      "title": "Mid Market Account Executive - EMEA (French Speaking)",
+      "department": "Sales",
+      "team": "Sales",
+      "employmentType": "FullTime",
+      "location": "France",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "secondaryLocations": [
+        {
+          "location": "United Kingdom",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Belgium",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Belgium",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Germany",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Germany",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Switzerland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Switzerland",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Ireland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Ireland",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Austria",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Austria"
+            }
+          }
+        },
+        {
+          "location": "Spain",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Spain"
+            }
+          }
+        },
+        {
+          "location": "Stuttgart",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Baden-Wurttemberg",
+              "addressCountry": "Germany",
+              "addressLocality": "Stuttgart"
+            }
+          }
+        },
+        {
+          "location": "Berlin",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Germany",
+              "addressLocality": "Berlin"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2026-09-08T16:27:26.694+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "",
+          "addressCountry": "France",
+          "addressLocality": ""
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/Ashby/86a60834-ba64-484d-9658-afa1bc97a957",
+      "applyUrl": "https://jobs.ashbyhq.com/Ashby/86a60834-ba64-484d-9658-afa1bc97a957/application",
+      "descriptionHtml": "<h2><strong>Why Join Sales at Ashby</strong></h2><p style=\"min-height:1.5em\">Sales at Ashby is a unique opportunity to sell a <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.ashbyhq.com/customers\"><u>product customers genuinely love</u></a> during an AI-fueled market expansion. Over 5,000 companies rely on Ashby, including OpenAI, Doctolib, Alan, Mistral and <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://Monday.com\">Monday.com</a>, and our business is durably growing faster than 100% year-over-year. <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.ashbyhq.com/blog/culture/series-d\"><u>We’re well funded</u></a>, and on a path to profitability. That's exceptionally rare for a company at our scale, and puts us in the top 10% of benchmarks.</p><p style=\"min-height:1.5em\">Nearly 1 in 3 of Ashby’s globally distributed team call Europe home! We’ve landed over 1000 customers in EMEA representing ~23% of our global revenue base<em>,</em>with well over 100 in France, clear evidence of strong product-market fit. We’re doubling down our investment in the region with in-market GTM, CS and Support resources. EU Data Residency and product localisation are committed and coming soon. We believe there is a meaningful opportunity to help modern teams move beyond legacy recruiting software.</p><p style=\"min-height:1.5em\">Ashby replaces 3-5 tools in a consolidation &amp; efficiency play that’s equally loved by recruiters and CFOs.…",
+      "descriptionPlain": "WHY JOIN SALES AT ASHBY\n\nSales at Ashby is a unique opportunity to sell a product customers genuinely love https://www.ashbyhq.com/customers during an AI-fueled market expansion. Over 5,000 companies rely on Ashby, including OpenAI, Doctolib, Alan, Mistral and Monday.com http://Monday.com, and our business is durably growing faster than 100% year-over-year. We’re well funded https://www.ashbyhq.com/blog/culture/series-d, and on a path to profitability. That's exceptionally rare for a company at our scale, and puts us in the top 10% of benchmarks.\n\nNearly 1 in 3 of Ashby’s globally distributed team call Europe home! We’ve landed over 1000 customers in EMEA representing ~23% of our global revenue base,with well over 100 in France, clear evidence of strong product-market fit. We’re doubling down our investment in the region with in-market GTM, CS and Support resources. EU Data Residency and product localisation are committed and coming soon. We believe there is a meaningful opportunity to help modern teams move beyond legacy recruiting software.\n\nAshby replaces 3-5 tools in a consolidation & efficiency play that’s equally loved by recruiters and CFOs. We’re known as a clear AI-leader https://www.ashbyhq.com/ai in the recruiting space. We are rapidly extending from a best-in-class recruiting product toward a multi-product platform, expanding upmarket, into new industries, and internationally. For sales reps, that means a large market full of legacy tools, and a product portfolio …",
+      "compensation": {
+        "compensationTierSummary": "€110K – €195.5K • Offers Equity • Offers Commission • Multiple Ranges",
+        "scrapeableCompensationSalarySummary": "€110K - €195.5K",
+        "compensationTiers": [
+          {
+            "id": "578bf152-5d8a-48d4-8fc5-658664165b71",
+            "tierSummary": "OTE €144.5K – €195.5K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 1 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "3376fe86-7d18-47ef-acf7-0da9f67d78bc",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "659f2f29-2e52-4d0c-8b4c-51727268a659",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "5b09c7b6-efde-4f66-85f6-ecb6cfe29980",
+                "summary": "OTE €144.5K – €195.5K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 144500,
+                "maxValue": 195500
+              }
+            ]
+          },
+          {
+            "id": "dd41799a-43df-449c-ac68-fd6044ced3d3",
+            "tierSummary": "OTE €127.5K – €172.5K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 2 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "a7d5af1a-2692-4e9d-96f4-4e5267dab1a0",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "77245e6e-9a5c-4511-8667-13b4e072944e",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "47ae4a45-026a-45b9-b857-96fbc74a28b6",
+                "summary": "OTE €127.5K – €172.5K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 127500,
+                "maxValue": 172500
+              }
+            ]
+          },
+          {
+            "id": "238f8e26-e75c-4ad6-910f-90127a2a9619",
+            "tierSummary": "OTE €110K – €149.5K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 3 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "692a5c75-70ee-4bfb-81da-d20a5eb9a63f",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "85eeb725-0cd4-463e-af57-6505a6fbc78c",
+                "summary": "OTE €110K – €149.5K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 110000,
+                "maxValue": 149500
+              },
+              {
+                "id": "b8121303-1856-416c-882b-2ae3e5b41b95",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              }
+            ]
+          },
+          {
+            "id": "9ea38d26-3c52-4b8e-b8bf-6537c71dd8d6",
+            "tierSummary": "OTE £144.5K – £195.5K • Offers Equity • Offers Commission",
+            "title": "UK Tier 1 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "9a8abd06-5486-4818-9804-54ac60bbb87a",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "e19ba716-cd5d-4b92-8343-7a70141546cc",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "c2900ca4-73d0-4d4e-b247-687d70ef0273",
+                "summary": "OTE £144.5K – £195.5K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": 144500,
+                "maxValue": 195500
+              }
+            ]
+          },
+          {
+            "id": "d1411b81-f2c3-487e-baf9-e70f37d91ac1",
+            "tierSummary": "OTE £127.5K – £172.5K • Offers Equity • Offers Commission",
+            "title": "UK Tier 2 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "617c392f-dfba-4f15-becd-4caf1584eda3",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "6c767299-d44d-48fb-856e-bc89e7e9bc22",
+                "summary": "OTE £127.5K – £172.5K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": 127500,
+                "maxValue": 172500
+              },
+              {
+                "id": "f101a32a-537d-408b-b7bf-f945cfb2f906",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": null,
+                "maxValue": null
+              }
+            ]
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "EquityPercentage",
+            "minValue": null,
+            "maxValue": null,
+            "interval": "1 YEAR"
+          },
+          {
+            "compensationType": "Commission",
+            "minValue": null,
+            "maxValue": null,
+            "interval": "1 YEAR"
+          },
+          {
+            "minValue": 110000,
+            "maxValue": 195500,
+            "currencyCode": "EUR",
+            "interval": "1 YEAR",
+            "compensationType": "Salary"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f40ef345-82a8-4956-9150-193b4fdf8183",
+      "title": "Senior Product Designer",
+      "department": "Design",
+      "team": "Design",
+      "employmentType": "FullTime",
+      "location": "Remote - US",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "secondaryLocations": [
+        {
+          "location": "Austin",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Texas",
+              "addressCountry": "USA",
+              "addressLocality": "Austin"
+            }
+          }
+        },
+        {
+          "location": "Los Angeles",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "California",
+              "addressCountry": "USA",
+              "addressLocality": "Los Angeles"
+            }
+          }
+        },
+        {
+          "location": "Portland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Oregon",
+              "addressCountry": "USA",
+              "addressLocality": "Portland"
+            }
+          }
+        },
+        {
+          "location": "Salt Lake City",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Utah",
+              "addressCountry": "USA",
+              "addressLocality": "Salt Lake City"
+            }
+          }
+        },
+        {
+          "location": "Waterloo",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Ontario",
+              "addressCountry": "Canada",
+              "addressLocality": "Waterloo"
+            }
+          }
+        },
+        {
+          "location": "Boston",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Massachusetts",
+              "addressCountry": "USA",
+              "addressLocality": "Boston"
+            }
+          }
+        },
+        {
+          "location": "Remote - Canada",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Canada",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Seattle",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Washington",
+              "addressCountry": "USA",
+              "addressLocality": "Seattle"
+            }
+          }
+        },
+        {
+          "location": "New York",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "New York",
+              "addressCountry": "USA",
+              "addressLocality": "New York"
+            }
+          }
+        },
+        {
+          "location": "San Francisco",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "CA",
+              "addressCountry": "USA",
+              "addressLocality": "San Francisco"
+            }
+          }
+        },
+        {
+          "location": "Vancouver",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "British Columbia",
+              "addressCountry": "Canada",
+              "addressLocality": "Vancouver"
+            }
+          }
+        },
+        {
+          "location": "Denver",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Colorado",
+              "addressCountry": "USA",
+              "addressLocality": "Denver"
+            }
+          }
+        },
+        {
+          "location": "Toronto",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Ontario",
+              "addressCountry": "Canada",
+              "addressLocality": "Toronto"
+            }
+          }
+        },
+        {
+          "location": "Chicago",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Illinois",
+              "addressCountry": "USA",
+              "addressLocality": "Chicago"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2025-12-05T22:43:22.147+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "",
+          "addressCountry": "United States",
+          "addressLocality": ""
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/Ashby/f40ef345-82a8-4956-9150-193b4fdf8183",
+      "applyUrl": "https://jobs.ashbyhq.com/Ashby/f40ef345-82a8-4956-9150-193b4fdf8183/application",
+      "descriptionHtml": "<p style=\"min-height:1.5em\">Hi! 👋 I'm <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.linkedin.com/in/chkrlee/\">Chris</a>, head of Product Design at Ashby.</p><p style=\"min-height:1.5em\">We're looking for a versatile, intrinsically motivated designer who is excited to contribute to rethinking how modern software is designed. At Ashby, you'll be part designer, part product manager, part consultant, and part design system manager (or some combination of the 4!). We do design differently here, and if that excites you, read on.</p><p style=\"min-height:1.5em\">Our unique approach is working - we're growing &gt;100% year-over-year and have notable customers like Notion, Linear, Shopify, and Snowflake. Our growth and retention metrics are best-in-class among our peers: we have tens of millions in ARR, very low churn, and many years of runway. We're backed by amazing investors like Y Combinator, Elad Gil, Lachy Groom, and many more! We’ll share more details once we meet.</p><p style=\"min-height:1.5em\"></p><h1>How We Work</h1><p style=\"min-height:1.5em\">In my previous roles, product teams always consisted of a product manager, a designer, and ~4-5 engineers. This may sound familiar to you! The product manager briefs the designer who then designs. After designing, mocks are handed to the engineers. <br /><br />We take a more principled approach here at Ashby. If you've been designing software enough, you'll realize in actuality, design is required in varying deg…",
+      "descriptionPlain": "Hi! 👋 I'm Chris https://www.linkedin.com/in/chkrlee/, head of Product Design at Ashby.\n\nWe're looking for a versatile, intrinsically motivated designer who is excited to contribute to rethinking how modern software is designed. At Ashby, you'll be part designer, part product manager, part consultant, and part design system manager (or some combination of the 4!). We do design differently here, and if that excites you, read on.\n\nOur unique approach is working - we're growing >100% year-over-year and have notable customers like Notion, Linear, Shopify, and Snowflake. Our growth and retention metrics are best-in-class among our peers: we have tens of millions in ARR, very low churn, and many years of runway. We're backed by amazing investors like Y Combinator, Elad Gil, Lachy Groom, and many more! We’ll share more details once we meet.\n\n\n\n\nHOW WE WORK\n\nIn my previous roles, product teams always consisted of a product manager, a designer, and ~4-5 engineers. This may sound familiar to you! The product manager briefs the designer who then designs. After designing, mocks are handed to the engineers. \n\nWe take a more principled approach here at Ashby. If you've been designing software enough, you'll realize in actuality, design is required in varying degrees on each project. Sometimes in the past, I'd be asked to design yet another settings page, when really all that was needed was an engineer to reuse existing components and just follow some documentation I had written. Other time…",
+      "compensation": {
+        "compensationTierSummary": "$160K – $225K • Offers Equity • Multiple Ranges",
+        "scrapeableCompensationSalarySummary": "$160K - $225K",
+        "compensationTiers": [
+          {
+            "id": "871fc919-3423-4f62-aa0a-d7e8889d8cd9",
+            "tierSummary": "$170K – $225K • Offers Equity",
+            "title": "US: San Francisco & New York",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "71761eae-1947-40bc-b401-98313e3514a5",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "d93993e0-79ce-4d95-a99f-af192215b23b",
+                "summary": "$170K – $225K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "USD",
+                "minValue": 170000,
+                "maxValue": 225000
+              }
+            ]
+          },
+          {
+            "id": "422b825b-a712-4462-a022-221032dfa1e7",
+            "tierSummary": "$165K – $220K • Offers Equity",
+            "title": "US: LA, Boston, Seattle, D.C.",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "7b1554fb-5100-4817-afc8-33e3e657329f",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "0c11567e-7a1e-44f9-8c9d-90e9793bb67d",
+                "summary": "$165K – $220K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "USD",
+                "minValue": 165000,
+                "maxValue": 220000
+              }
+            ]
+          },
+          {
+            "id": "f4756289-eec4-4963-9d0e-c95a02806c07",
+            "tierSummary": "$160K – $205K • Offers Equity",
+            "title": "US: All Other Locations",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "4e8fee1b-29b9-41c6-adc9-8b1da48c1745",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "d7a92ebe-661e-42d8-acd4-d03c799bc826",
+                "summary": "$160K – $205K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "USD",
+                "minValue": 160000,
+                "maxValue": 205000
+              }
+            ]
+          },
+          {
+            "id": "d0ae9f0a-512b-483d-b591-714e9f8f68e9",
+            "tierSummary": "CA$145K – CA$190K • Offers Equity",
+            "title": "Canada: Toronto & Vancouver",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "adbecbb1-2185-4038-a348-8b5132d9a7d4",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "4a163fb4-0ef6-44aa-adf1-3afdf5e56617",
+                "summary": "CA$145K – CA$190K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "CAD",
+                "minValue": 145000,
+                "maxValue": 190000
+              }
+            ]
+          },
+          {
+            "id": "582ad563-0085-4bbe-bff5-ac0497589d6a",
+            "tierSummary": "CA$135K – CA$180K • Offers Equity",
+            "title": "Canada: All Other Locations",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "d29d0203-2309-415e-bf2e-a4d40475743c",
+                "summary": "CA$135K – CA$180K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "CAD",
+                "minValue": 135000,
+                "maxValue": 180000
+              },
+              {
+                "id": "ca957652-f745-46af-952a-eb8c69ee7f40",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              }
+            ]
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "EquityPercentage",
+            "minValue": null,
+            "maxValue": null,
+            "interval": "1 YEAR"
+          },
+          {
+            "minValue": 160000,
+            "maxValue": 225000,
+            "currencyCode": "USD",
+            "interval": "1 YEAR",
+            "compensationType": "Salary"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d573471b-2005-482c-9fbf-d1df9550cb57",
+      "title": "Engineering Manager - UK",
+      "department": "Engineering",
+      "team": "EMEA Engineering",
+      "employmentType": "FullTime",
+      "location": "United Kingdom",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "secondaryLocations": [
+        {
+          "location": "Cardiff",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Cardiff"
+            }
+          }
+        },
+        {
+          "location": "Birmingham",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Birmingham"
+            }
+          }
+        },
+        {
+          "location": "Bristol",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Bristol"
+            }
+          }
+        },
+        {
+          "location": "Manchester",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Manchester"
+            }
+          }
+        },
+        {
+          "location": "Leeds",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Leeds"
+            }
+          }
+        },
+        {
+          "location": "Oxford",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Oxford"
+            }
+          }
+        },
+        {
+          "location": "London",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "London"
+            }
+          }
+        },
+        {
+          "location": "Cambridge",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Cambridge"
+            }
+          }
+        },
+        {
+          "location": "Glasgow",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Glasgow"
+            }
+          }
+        },
+        {
+          "location": "Edinburgh",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Edinburgh"
+            }
+          }
+        },
+        {
+          "location": "Belfast",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": "Belfast"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2025-04-01T14:39:51.428+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressRegion": "",
+          "addressCountry": "United Kingdom",
+          "addressLocality": ""
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/Ashby/d573471b-2005-482c-9fbf-d1df9550cb57",
+      "applyUrl": "https://jobs.ashbyhq.com/Ashby/d573471b-2005-482c-9fbf-d1df9550cb57/application",
+      "descriptionHtml": "<p style=\"min-height:1.5em\">Hi 👋 I’m <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://uk.linkedin.com/in/colinhoweuk\"><u>Colin</u></a>, Director of Engineering, Europe. How do you feel about software engineers writing product specs, making product decisions, and not breaking down projects into individual tickets? If that sounds exciting (even if a bit scary), read on because I’m looking for an engineering manager to help us build a different type of engineering team and culture at Ashby.</p><p style=\"min-height:1.5em\">To start, why do we need to be different? Time and again, I have witnessed engineers knowing what needs to be done yet being unable to get things done because of “the process” or because “more data is needed.” Some of the most effective projects have been <em>skunkworks </em>projects, where engineers have taken total ownership of a problem and driven it to completion. I want to normalize that at Ashby.</p><p style=\"min-height:1.5em\">When we think about how these processes came about, we realize they carry a <em>pessimistic</em> mindset. They box people into smaller roles to minimize the chance of not meeting a certain standard. At Ashby. we’re building an environment that is <em>optimistic </em>about what engineers can own and achieve and embraces the innovative engineers (and frankly, often stays out of their way).</p><p style=\"min-height:1.5em\">To accomplish this, our engineering leaders need to think deeply about individual performance, pr…",
+      "descriptionPlain": "Hi 👋 I’m Colin https://uk.linkedin.com/in/colinhoweuk, Director of Engineering, Europe. How do you feel about software engineers writing product specs, making product decisions, and not breaking down projects into individual tickets? If that sounds exciting (even if a bit scary), read on because I’m looking for an engineering manager to help us build a different type of engineering team and culture at Ashby.\n\nTo start, why do we need to be different? Time and again, I have witnessed engineers knowing what needs to be done yet being unable to get things done because of “the process” or because “more data is needed.” Some of the most effective projects have been skunkworks projects, where engineers have taken total ownership of a problem and driven it to completion. I want to normalize that at Ashby.\n\nWhen we think about how these processes came about, we realize they carry a pessimistic mindset. They box people into smaller roles to minimize the chance of not meeting a certain standard. At Ashby. we’re building an environment that is optimistic about what engineers can own and achieve and embraces the innovative engineers (and frankly, often stays out of their way).\n\nTo accomplish this, our engineering leaders need to think deeply about individual performance, process, and culture - not running sprint planning or driving product and technical decisions. You’ll focus on building your team, their skills to thrive with the ownership they’re given, and an environment that empower…",
+      "compensation": {
+        "compensationTierSummary": "£150K – £250K",
+        "scrapeableCompensationSalarySummary": "£150K - £250K",
+        "compensationTiers": [
+          {
+            "id": "e4d74e59-a5e9-4d24-b85f-6c40b5fa4674",
+            "tierSummary": "£150K – £250K",
+            "title": "UK",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "e3e53638-aaf2-4502-b2ba-65d60cd01694",
+                "summary": "£150K – £250K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": 150000,
+                "maxValue": 250000
+              }
+            ]
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "EquityPercentage",
+            "interval": "NONE",
+            "currencyCode": null,
+            "minValue": null,
+            "maxValue": 0.16
+          },
+          {
+            "compensationType": "Salary",
+            "interval": "1 YEAR",
+            "currencyCode": "GBP",
+            "minValue": 150000,
+            "maxValue": 250000
+          }
+        ]
+      }
+    },
+    {
+      "id": "7e4e8a93-c35d-43c1-a739-c53aba8b682f",
+      "title": "Enterprise Account Executive - DACH",
+      "department": "Sales",
+      "team": "Sales",
+      "employmentType": "FullTime",
+      "location": "Germany",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "secondaryLocations": [
+        {
+          "location": "United Kingdom",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "United Kingdom",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Belgium",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Belgium",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Ireland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Ireland",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Czech Republic",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Czech Republic",
+              "addressCountry": "Czech Republic",
+              "addressLocality": "Prague"
+            }
+          }
+        },
+        {
+          "location": "Austria",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Austria"
+            }
+          }
+        },
+        {
+          "location": "Poland",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Poland",
+              "addressCountry": "Poland",
+              "addressLocality": "Warsaw"
+            }
+          }
+        },
+        {
+          "location": "Spain",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Spain"
+            }
+          }
+        },
+        {
+          "location": "Netherlands",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "Netherlands",
+              "addressLocality": "Amsterdam"
+            }
+          }
+        },
+        {
+          "location": "France",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "",
+              "addressCountry": "France",
+              "addressLocality": ""
+            }
+          }
+        },
+        {
+          "location": "Hungary",
+          "address": {
+            "postalAddress": {
+              "addressRegion": "Hungary",
+              "addressCountry": "Hungary",
+              "addressLocality": "Budapest"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2026-07-27T14:29:07.354+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressCountry": "Germany",
+          "addressLocality": ""
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/Ashby/7e4e8a93-c35d-43c1-a739-c53aba8b682f",
+      "applyUrl": "https://jobs.ashbyhq.com/Ashby/7e4e8a93-c35d-43c1-a739-c53aba8b682f/application",
+      "descriptionHtml": "<h2><strong>Why Join Sales at Ashby</strong></h2><p style=\"min-height:1.5em\">Sales at Ashby is a unique opportunity to sell a <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.ashbyhq.com/customers\"><u>product customers genuinely love</u></a> during an AI-fueled market expansion. Over 5,000 companies rely on Ashby, including OpenAI, Bolt, Statista, Neura Robotics and <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://Monday.com\">Monday.com</a>, and our business is durably growing faster than 100% year-over-year. <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.ashbyhq.com/blog/culture/series-d\"><u>We’re well funded</u></a>, and on a path to profitability. That's exceptionally rare for a company at our scale, and puts us in the top 10% of benchmarks.</p><p style=\"min-height:1.5em\">Nearly 1 in 3 of Ashby’s globally distributed team call Europe home! We’ve landed over 1000 customers in EMEA representing ~23% of our global revenue base<em>,</em> with well over 100 in the DACH region, clear evidence of strong product-market fit. We’re doubling down our investment in the region with in-market GTM, CS and Support resources. EU Data Residency and product localisation are committed and coming soon. We believe there is a meaningful opportunity to help modern teams move beyond legacy recruiting software.</p><p style=\"min-height:1.5em\">Ashby replaces 3-5 tools in a consolidation &amp; efficiency play that’s equally loved by rec…",
+      "descriptionPlain": "WHY JOIN SALES AT ASHBY\n\nSales at Ashby is a unique opportunity to sell a product customers genuinely love https://www.ashbyhq.com/customers during an AI-fueled market expansion. Over 5,000 companies rely on Ashby, including OpenAI, Bolt, Statista, Neura Robotics and Monday.com http://Monday.com, and our business is durably growing faster than 100% year-over-year. We’re well funded https://www.ashbyhq.com/blog/culture/series-d, and on a path to profitability. That's exceptionally rare for a company at our scale, and puts us in the top 10% of benchmarks.\n\nNearly 1 in 3 of Ashby’s globally distributed team call Europe home! We’ve landed over 1000 customers in EMEA representing ~23% of our global revenue base, with well over 100 in the DACH region, clear evidence of strong product-market fit. We’re doubling down our investment in the region with in-market GTM, CS and Support resources. EU Data Residency and product localisation are committed and coming soon. We believe there is a meaningful opportunity to help modern teams move beyond legacy recruiting software.\n\nAshby replaces 3-5 tools in a consolidation & efficiency play that’s equally loved by recruiters and CFOs. We’re known as a clear AI-leader https://www.ashbyhq.com/ai in the recruiting space. We are rapidly extending from a best-in-class recruiting product toward a multi-product platform, expanding upmarket, into new industries, and internationally. For sales reps, that means a large market full of legacy tools, and a p…",
+      "compensation": {
+        "compensationTierSummary": "€175.5K – €261K • Offers Equity • Offers Commission • Multiple Ranges",
+        "scrapeableCompensationSalarySummary": "€175.5K - €261K",
+        "compensationTiers": [
+          {
+            "id": "41fd39bf-c6ad-4ff2-8a28-1e9cb523b60f",
+            "tierSummary": "OTE €229.5K – €261K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 1 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "c31c2247-75bd-40d2-82f4-d3a3b5216738",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "0694b7bc-5d47-4735-b887-013d39248736",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "3682c378-7ea3-4f01-9bc6-d3c6322f1a0a",
+                "summary": "OTE €229.5K – €261K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 229500,
+                "maxValue": 261000
+              }
+            ]
+          },
+          {
+            "id": "a62e03e0-6bc1-4137-a79f-410d7e80c3ba",
+            "tierSummary": "OTE €202.5K – €230K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 2 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "d360e436-d2cf-4a0d-8f0b-986f256c9563",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "38a49125-c07b-4977-992f-85224b1a4b7e",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "c458b58b-b380-4360-8424-d09cc081c085",
+                "summary": "OTE €202.5K – €230K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 202500,
+                "maxValue": 230000
+              }
+            ]
+          },
+          {
+            "id": "d5735f0b-f4dc-4a42-9cd4-e7a7a605448b",
+            "tierSummary": "OTE €175.5K – €200K • Offers Equity • Offers Commission",
+            "title": "EMEA Tier 3 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "090b73ee-745a-48ad-81aa-2962647550bd",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "f01ddab7-1e47-48f3-ba57-12e69d45144e",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "bba95420-1be8-43b8-8d0b-d63d08c5dc65",
+                "summary": "OTE €175.5K – €200K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "EUR",
+                "minValue": 175500,
+                "maxValue": 200000
+              }
+            ]
+          },
+          {
+            "id": "149848a9-05fb-4f32-80a5-2c82506c3092",
+            "tierSummary": "OTE £229.5K – £261K • Offers Equity • Offers Commission",
+            "title": "UK Tier 1 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "3a97d7ad-f208-4cfe-bcc9-230cb7f2cf09",
+                "summary": "OTE £229.5K – £261K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": 229500,
+                "maxValue": 261000
+              },
+              {
+                "id": "91e89112-d1d6-4418-97fb-da3cd9149eb2",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "584819a5-49e9-4d0a-9eba-d09bfca996bc",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": null,
+                "maxValue": null
+              }
+            ]
+          },
+          {
+            "id": "7ea00c0e-bd64-402c-b564-f3ec8c4581dd",
+            "tierSummary": "OTE £202.5K – £230K • Offers Equity • Offers Commission",
+            "title": "UK Tier 2 - Remote",
+            "additionalInformation": null,
+            "components": [
+              {
+                "id": "abd169c9-950f-4dea-bee5-aef261189dba",
+                "summary": "Offers Commission",
+                "compensationType": "Commission",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "3e5c3612-16da-44ab-bf1c-a6ff4635ebf2",
+                "summary": "Offers Equity",
+                "compensationType": "EquityPercentage",
+                "interval": "NONE",
+                "currencyCode": null,
+                "minValue": null,
+                "maxValue": null
+              },
+              {
+                "id": "cc66e1d8-b50b-4caf-8133-3f6aa1ecf0e7",
+                "summary": "OTE £202.5K – £230K",
+                "compensationType": "Salary",
+                "interval": "1 YEAR",
+                "currencyCode": "GBP",
+                "minValue": 202500,
+                "maxValue": 230000
+              }
+            ]
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "EquityPercentage",
+            "minValue": null,
+            "maxValue": null,
+            "interval": "1 YEAR"
+          },
+          {
+            "compensationType": "Commission",
+            "minValue": null,
+            "maxValue": null,
+            "interval": "1 YEAR"
+          },
+          {
+            "minValue": 175500,
+            "maxValue": 261000,
+            "currencyCode": "EUR",
+            "interval": "1 YEAR",
+            "compensationType": "Salary"
+          }
+        ]
+      }
+    }
+  ],
+  "apiVersion": "1"
+}

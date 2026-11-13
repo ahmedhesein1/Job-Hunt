@@ -1,0 +1,139 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  One-time bootstrap for Job Finder: a small SAM artifact bucket that expires old
+  deployment artifacts (§14), and a GitHub Actions OIDC deploy role so no long-lived AWS
+  access key is stored in GitHub (§3). Deploy once per account/region:
+
+    aws cloudformation deploy --template-file scripts/bootstrap.yaml \
+      --stack-name job-finder-bootstrap --capabilities CAPABILITY_NAMED_IAM \
+      --parameter-overrides GitHubRepository=ahmedhesein1/Job-Hunt
+
+Parameters:
+  GitHubRepository:
+    Type: String
+    Description: owner/repo allowed to assume the deploy role.
+  AppStackName:
+    Type: String
+    Default: job-finder
+  CreateOidcProvider:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Set false if token.actions.githubusercontent.com already exists in this account.
+
+Conditions:
+  CreateProvider: !Equals [!Ref CreateOidcProvider, 'true']
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-artifacts
+            Status: Enabled
+            ExpirationInDays: 14
+            NoncurrentVersionExpiration: { NoncurrentDays: 1 }
+            AbortIncompleteMultipartUpload: { DaysAfterInitiation: 1 }
+
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppStackName}-github-deploy'
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepository}:environment:production'
+      Policies:
+        - PolicyName: sam-deploy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: CloudFormationStack
+                Effect: Allow
+                Action: [cloudformation:*]
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AppStackName}/*'
+                  - !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31'
+              - Sid: CloudFormationRead
+                Effect: Allow
+                Action: [cloudformation:ValidateTemplate, cloudformation:GetTemplateSummary, cloudformation:ListStacks]
+                Resource: '*'
+              - Sid: Artifacts
+                Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:ListBucket, s3:GetBucketLocation]
+                Resource: [!GetAtt ArtifactBucket.Arn, !Sub '${ArtifactBucket.Arn}/*']
+              - Sid: Lambda
+                Effect: Allow
+                Action: [lambda:*]
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${AppStackName}-*'
+              - Sid: LambdaEventSources
+                Effect: Allow
+                Action: [lambda:CreateEventSourceMapping, lambda:UpdateEventSourceMapping, lambda:DeleteEventSourceMapping, lambda:GetEventSourceMapping, lambda:ListEventSourceMappings, lambda:TagResource]
+                Resource: '*'
+              - Sid: Roles
+                Effect: Allow
+                Action:
+                  [iam:CreateRole, iam:DeleteRole, iam:GetRole, iam:PassRole, iam:TagRole, iam:UntagRole, iam:UpdateAssumeRolePolicy,
+                   iam:PutRolePolicy, iam:DeleteRolePolicy, iam:GetRolePolicy, iam:AttachRolePolicy, iam:DetachRolePolicy, iam:ListRolePolicies, iam:ListAttachedRolePolicies]
+                Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${AppStackName}-*'
+              - Sid: Table
+                Effect: Allow
+                Action: [dynamodb:*]
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/jobfinder'
+                  - !Sub 'arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/jobfinder/*'
+              - Sid: StreamDiscovery
+                Effect: Allow
+                Action: [dynamodb:ListStreams]
+                Resource: '*'
+              - Sid: Queues
+                Effect: Allow
+                Action: [sqs:*]
+                Resource: !Sub 'arn:${AWS::Partition}:sqs:${AWS::Region}:${AWS::AccountId}:${AppStackName}-*'
+              - Sid: Topic
+                Effect: Allow
+                Action: [sns:*]
+                Resource: !Sub 'arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${AppStackName}-*'
+              - Sid: Schedules
+                Effect: Allow
+                Action: [scheduler:*]
+                Resource: !Sub 'arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/${AppStackName}-*'
+              - Sid: Logs
+                Effect: Allow
+                Action: [logs:CreateLogGroup, logs:DeleteLogGroup, logs:PutRetentionPolicy, logs:DescribeLogGroups, logs:TagResource, logs:TagLogGroup, logs:ListTagsForResource]
+                Resource: '*'
+              - Sid: Alarms
+                Effect: Allow
+                Action: [cloudwatch:PutMetricAlarm, cloudwatch:DeleteAlarms, cloudwatch:DescribeAlarms, cloudwatch:TagResource]
+                Resource: !Sub 'arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AppStackName}-*'
+
+Outputs:
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+  DeployRoleArn:
+    Value: !GetAtt DeployRole.Arn

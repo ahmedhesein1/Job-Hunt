@@ -1,0 +1,804 @@
+{
+  "offers": [
+    {
+      "experience_code": "experienced",
+      "position": 14,
+      "hybrid": false,
+      "options_cv": "required",
+      "postal_code": null,
+      "mailbox_email": "job.d2rw7@holepunch.recruitee.com",
+      "salary": {
+        "max": null,
+        "min": null,
+        "period": null,
+        "currency": null
+      },
+      "options_title": "off",
+      "state_name": "Berlin",
+      "translations": {
+        "en": {
+          "description": "<p class=\"PDq2pG_selectionAnchorContainer\" style=\"text-align:start;\">Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site.&nbsp;<strong>We are no longer reviewing applications submitted through this page.</strong></p><p style=\"text-align:start;\">Please apply for the same role through Tether here:&nbsp; <a rel=\"noopener\" target=\"_blank\" href=\"https://careers.tether.io/o/p2p-nodejs-engineer-holepunch-100-remote-worldwide\">https://careers.tether.io/o/p2p-nodejs-engineer-holepunch-100-remote-worldwide</a></p><p style=\"min-height: 1.7em;\"></p><p style=\"min-height: 1.7em;\"></p><p style=\"min-height: 1.7em;\"></p><p><strong>About Holepunch </strong></p><p>At Holepunch, we’re building a peer-to-peer development platform that lets you build apps that don’t require infrastructure. No servers whatsoever. Holepunch apps can be deployed to users directly from the machine you develop on, and scale effortlessly. Since servers are removed from the equation, users retain full control over the data they create, keeping things maximally private. The benefits of peer-to-peer are innumerable, and we envision a world where everything is peer-to-peer by default. We’ve started demonstrating what this future will look like with Keet, our P2P communications app.</p><p style=\"min-height: 1.7em;\"></p><p>Holepunch is built on a battle-hardened, Node.js-based technology stack we’ve built called Hypercore, which provides the basic machinery for estab",
+          "title": "P2P Node.js Engineer (100% Remote, Worldwide)",
+          "highlight": null,
+          "requirements": "<p>Requirements</p><ul class=\"p-rich_text_list p-rich_text_list__bullet p-rich_text_list--nested\"><li><p>Extensive knowledge of P2P protocols (Kademlia, BitTorrent, libp2p, hypercore)</p></li><li><p>Demonstrable experience optimizing network protocols for performance</p></li><li><p>Advanced JavaScript skills for implementing high-performance networking code</p></li><li><p>Deep understanding of UDP and TCP/IP networking, including NAT traversal techniques</p></li><li><p>Experience implementing custom binary protocols and serialization formats</p></li><li><p>Familiarity with cryptographic primitives for secure P2P communication</p></li><li><p>Experience with performance profiling and optimization of networked systems</p></li></ul><p>Preferred Qualifications</p><ul class=\"p-rich_text_list p-rich_text_list__bullet p-rich_text_list--nested\"><li><p>5+ years experience building production P2P systems or distributed systems</p></li><li><p>Experience optimizing JavaScript for low-latency networking applications</p></li><li><p>Knowledge of V8 internals and JavaScript performance characteristics</p></li><li><p>Experience with libuv and asynchronous I/O in C</p></li><li><p>Contributions to open-source P2P projects or networking libraries</p></li><li><p>Experience building reliable systems on unreliable networks</p></li><li><p>Experience with <a rel=\"noopener\" target=\"_blank\" href=\"http://Node.js\">Node.js</a> native addons and bridging between JS and C</p></li></ul>",
+          "sharing_image": null,
+          "locations_question": "What is your preferred work location?",
+          "sharing_description": "Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site. We are no longer reviewing applications submitted through this page.Please apply for th",
+          "sharing_title": "P2P Node.js Engineer (100% Remote, Worldwide)"
+        }
+      },
+      "locations_question_type": "multiple_choice",
+      "published_at": "2026-07-10 13:18:00 UTC",
+      "close_at": null,
+      "min_hours": 37,
+      "highlight": null,
+      "state_code": "BE",
+      "city": "Germany",
+      "locations_question_required": true,
+      "updated_at": "2026-09-09 11:45:53 UTC",
+      "cover_image": null,
+      "options_cover_letter": "optional",
+      "options_photo": "off",
+      "max_hours": 40,
+      "created_at": "2025-07-22 11:03:18 UTC",
+      "min_hours_per_week": "37.00",
+      "requirements": "<p>Requirements</p><ul class=\"p-rich_text_list p-rich_text_list__bullet p-rich_text_list--nested\"><li><p>Extensive knowledge of P2P protocols (Kademlia, BitTorrent, libp2p, hypercore)</p></li><li><p>Demonstrable experience optimizing network protocols for performance</p></li><li><p>Advanced JavaScript skills for implementing high-performance networking code</p></li><li><p>Deep understanding of UDP and TCP/IP networking, including NAT traversal techniques</p></li><li><p>Experience implementing custom binary protocols and serialization formats</p></li><li><p>Familiarity with cryptographic primitives for secure P2P communication</p></li><li><p>Experience with performance profiling and optimization of networked systems</p></li></ul><p>Preferred Qualifications</p><ul class=\"p-rich_text_list p-rich_text_list__bullet p-rich_text_list--nested\"><li><p>5+ years experience building production P2P systems or distributed systems</p></li><li><p>Experience optimizing JavaScript for low-latency networking applications</p></li><li><p>Knowledge of V8 internals and JavaScript performance characteristics</p></li><li><p>Experience with libuv and asynchronous I/O in C</p></li><li><p>Contributions to open-source P2P projects or networking libraries</p></li><li><p>Experience building reliable systems on unreliable networks</p></li><li><p>Experience with <a rel=\"noopener\" target=\"_blank\" href=\"http://Node.js\">Node.js</a> native addons and bridging between JS and C</p></li></ul>",
+      "open_questions": [
+        {
+          "id": 3318093,
+          "position": 1,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Why are you interested in working at Holepunch?",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Why are you interested in working at Holepunch?"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318094,
+          "position": 2,
+          "options": {},
+          "required": true,
+          "body": "How do you rate your own skills with Node.js?",
+          "kind": "single_choice",
+          "translations": {
+            "en": {
+              "body": "How do you rate your own skills with Node.js?"
+            }
+          },
+          "open_question_options": [
+            {
+              "id": 4875590,
+              "position": 0,
+              "body": "Beginner",
+              "translations": {
+                "en": {
+                  "body": "Beginner"
+                }
+              }
+            },
+            {
+              "id": 4875591,
+              "position": 1,
+              "body": "Intermediate",
+              "translations": {
+                "en": {
+                  "body": "Intermediate"
+                }
+              }
+            },
+            {
+              "id": 4875592,
+              "position": 2,
+              "body": "Advanced",
+              "translations": {
+                "en": {
+                  "body": "Advanced"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 3318095,
+          "position": 3,
+          "options": {},
+          "required": true,
+          "body": "How do you rate your own skills with native programming such as C++?",
+          "kind": "single_choice",
+          "translations": {
+            "en": {
+              "body": "How do you rate your own skills with native programming such as C++?"
+            }
+          },
+          "open_question_options": [
+            {
+              "id": 4875593,
+              "position": 0,
+              "body": "Beginner",
+              "translations": {
+                "en": {
+                  "body": "Beginner"
+                }
+              }
+            },
+            {
+              "id": 4875594,
+              "position": 1,
+              "body": "Intermediate",
+              "translations": {
+                "en": {
+                  "body": "Intermediate"
+                }
+              }
+            },
+            {
+              "id": 4875595,
+              "position": 2,
+              "body": "Advanced",
+              "translations": {
+                "en": {
+                  "body": "Advanced"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 3318096,
+          "position": 4,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Do you have any experience with networking such as TCP/UDP? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any experience with networking such as TCP/UDP? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318097,
+          "position": 5,
+          "options": {},
+          "required": true,
+          "body": "Do you have any experience working with libuv? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any experience working with libuv? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318098,
+          "position": 6,
+          "options": {},
+          "required": true,
+          "body": "Do you have any experience with decentralized systems such as DHTs, distributed databases etc? if so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any experience with decentralized systems such as DHTs, distributed databases etc? if so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318099,
+          "position": 7,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Useful links (e.g. GitHub)",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Useful links (e.g. GitHub)"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318100,
+          "position": 8,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Tell us about an interesting project you worked on recently (could be spare time open source project)",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Tell us about an interesting project you worked on recently (could be spare time open source project)"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318101,
+          "position": 9,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Do you have any remote working experience? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Do you have any remote working experience? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318102,
+          "position": 10,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Should we offer you a position, when can you start? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Should we offer you a position, when can you start? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318103,
+          "position": 11,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Considering the role is remote, from which country will you be working? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Considering the role is remote, from which country will you be working? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 3318104,
+          "position": 12,
+          "options": {},
+          "required": true,
+          "body": "What is your expected salary? (annual USD)",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "What is your expected salary? (annual USD)"
+            }
+          },
+          "open_question_options": []
+        }
+      ],
+      "country": "Germany",
+      "sharing_description": "Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site. We are no longer reviewing applications submitted through this page.Please apply for th",
+      "title": "P2P Node.js Engineer (100% Remote, Worldwide)",
+      "tags": [],
+      "sharing_image": null,
+      "max_hours_per_week": "40.0",
+      "country_code": "DE",
+      "department": "Engineering",
+      "slug": "p2p-nodejs-engineer",
+      "locations": [
+        {
+          "id": 247052,
+          "name": "Germany",
+          "state": "Berlin",
+          "country": "Germany",
+          "city": "Germany",
+          "translations": {
+            "en": {
+              "name": "Germany",
+              "city": "Germany",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "DE",
+          "state_code": "BE",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 184123,
+          "name": "Greece > Athens",
+          "state": "Attikí",
+          "country": "Greece",
+          "city": "Athens",
+          "translations": {
+            "en": {
+              "name": "Greece > Athens",
+              "city": "Athens",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "GR",
+          "state_code": "I",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 184124,
+          "name": "Denmark > Copenhagen",
+          "state": "Hovedstaden",
+          "country": "Denmark",
+          "city": "Copenhagen",
+          "translations": {
+            "en": {
+              "name": "Denmark > Copenhagen",
+              "city": "Copenhagen",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "DK",
+          "state_code": "84",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 186962,
+          "name": "Switzerland > Zurich",
+          "state": "Zürich",
+          "country": "Switzerland",
+          "city": "Zurich",
+          "translations": {
+            "en": {
+              "name": "Switzerland > Zurich",
+              "city": "Zurich",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "CH",
+          "state_code": "ZH",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        }
+      ],
+      "description": "<p class=\"PDq2pG_selectionAnchorContainer\" style=\"text-align:start;\">Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site.&nbsp;<strong>We are no longer reviewing applications submitted through this page.</strong></p><p style=\"text-align:start;\">Please apply for the same role through Tether here:&nbsp; <a rel=\"noopener\" target=\"_blank\" href=\"https://careers.tether.io/o/p2p-nodejs-engineer-holepunch-100-remote-worldwide\">https://careers.tether.io/o/p2p-nodejs-engineer-holepunch-100-remote-worldwide</a></p><p style=\"min-height: 1.7em;\"></p><p style=\"min-height: 1.7em;\"></p><p style=\"min-height: 1.7em;\"></p><p><strong>About Holepunch </strong></p><p>At Holepunch, we’re building a peer-to-peer development platform that lets you build apps that don’t require infrastructure. No servers whatsoever. Holepunch apps can be deployed to users directly from the machine you develop on, and scale effortlessly. Since servers are removed from the equation, users retain full control over the data they create, keeping things maximally private. The benefits of peer-to-peer are innumerable, and we envision a world where everything is peer-to-peer by default. We’ve started demonstrating what this future will look like with Keet, our P2P communications app.</p><p style=\"min-height: 1.7em;\"></p><p>Holepunch is built on a battle-hardened, Node.js-based technology stack we’ve built called Hypercore, which provides the basic machinery for estab",
+      "location_question_visible": false,
+      "on_site": false,
+      "remote": true,
+      "location": "Remote job",
+      "guid": "d2rw7",
+      "careers_url": "https://holepunch.recruitee.com/o/p2p-nodejs-engineer",
+      "education_code": "high_school",
+      "locations_question": "What is your preferred work location?",
+      "id": 2216042,
+      "careers_apply_url": "https://holepunch.recruitee.com/o/p2p-nodejs-engineer/c/new",
+      "options_salutation": "off",
+      "options_phone": "off",
+      "sharing_title": "P2P Node.js Engineer (100% Remote, Worldwide)",
+      "dynamic_fields": [],
+      "employment_type_code": "fulltime_permanent",
+      "company_name": "Holepunch",
+      "status": "published",
+      "category_code": "internet"
+    },
+    {
+      "experience_code": "mid_level",
+      "position": 5,
+      "hybrid": false,
+      "options_cv": "required",
+      "postal_code": null,
+      "mailbox_email": "job.29bpn@holepunch.recruitee.com",
+      "salary": {
+        "max": null,
+        "min": null,
+        "period": null,
+        "currency": null
+      },
+      "options_title": "off",
+      "state_name": "Nairobi City",
+      "translations": {
+        "en": {
+          "description": "<p class=\"PDq2pG_selectionAnchorContainer\" style=\"text-align:start;\">Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site.&nbsp;<strong>We are no longer reviewing applications submitted through this page.</strong></p><p style=\"text-align:start;\">Please apply for the same role through Tether here:&nbsp;<a rel=\"noopener\" target=\"_blank\" href=\"https://careers.tether.io/o/senior-nodejs-software-engineer-holepunch-100-remote-worldwide\">https://careers.tether.io/o/senior-nodejs-software-engineer-holepunch-100-remote-worldwide</a></p><p><br></p><h4><strong>Join Our Mission: Software Engineer - Node (100% Remote)</strong></h4><p>We are seeking a talented and motivated <a rel=\"noopener\" target=\"_blank\" href=\"http://Node.js\">Node.js</a> Software Engineer to join our dynamic team. In this role, you will be responsible for developing and maintaining our P2P stack and expanding our ecosystem, which includes over 1500 public npm modules and robust, modular codebase.</p>",
+          "title": "Senior Node.js Software Engineer (100% Remote, Worldwide)",
+          "highlight": null,
+          "requirements": "<ul><li><p>Proven experience in Node.js development with production-scale applications.</p></li><li><p>Strong competency in writing modular, maintainable code.&nbsp;</p></li><li><p>Experience creating and managing reusable npm modules.</p></li><li><p>Solid skillset in testing &amp; debugging.</p></li><li><p>Deep interest or experience with P2P technologies or distributed systems.</p></li></ul><ul><li><p>Comfort working in a remote, globally distributed team; good communication skills.</p></li></ul><p style=\"min-height: 1.7em;\"></p><h3><strong>Preferred Qualifications</strong></h3><ul><li><p>Experience with native Node.js extensions (C/C++), or binding JS to lower-level code.</p></li><li><p>Demonstrated ability to optimize network protocols or systems: latency, throughput, etc.</p></li><li><p>Familiarity with advanced networking concepts.</p></li></ul><ul><li><p>Past contributions to OSS projects, especially in P2P or decentralized tech<br></p></li></ul><h3><strong>Why Holepunch?</strong></h3><p>At Holepunch, you will:</p><p style=\"min-height: 1.7em;\"></p><ul><li><p>Work on groundbreaking technology that prioritizes user autonomy and privacy.</p></li><li><p>Collaborate with a team of thinkers and innovators dedicated to reshaping the digital landscape.</p></li><li><p>Contribute to a future where technology serves humanity, not the other way around.</p><p style=\"min-height: 1.7em;\"></p></li></ul><p>If you are driven by innovation and eager to build decentralized solutions that ",
+          "sharing_image": null,
+          "locations_question": "What is your preferred work location?",
+          "sharing_description": "Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site. We are no longer reviewing applications submitted through this page.Please apply for th",
+          "sharing_title": "Senior Node.js Software Engineer (100% Remote, Worldwide)"
+        }
+      },
+      "locations_question_type": "multiple_choice",
+      "published_at": "2025-11-26 11:21:04 UTC",
+      "close_at": null,
+      "min_hours": null,
+      "highlight": null,
+      "state_code": "30",
+      "city": "Kenya",
+      "locations_question_required": true,
+      "updated_at": "2026-09-09 11:43:30 UTC",
+      "cover_image": null,
+      "options_cover_letter": "optional",
+      "options_photo": "off",
+      "max_hours": null,
+      "created_at": "2024-06-17 09:02:03 UTC",
+      "min_hours_per_week": "30.0",
+      "requirements": "<ul><li><p>Proven experience in Node.js development with production-scale applications.</p></li><li><p>Strong competency in writing modular, maintainable code.&nbsp;</p></li><li><p>Experience creating and managing reusable npm modules.</p></li><li><p>Solid skillset in testing &amp; debugging.</p></li><li><p>Deep interest or experience with P2P technologies or distributed systems.</p></li></ul><ul><li><p>Comfort working in a remote, globally distributed team; good communication skills.</p></li></ul><p style=\"min-height: 1.7em;\"></p><h3><strong>Preferred Qualifications</strong></h3><ul><li><p>Experience with native Node.js extensions (C/C++), or binding JS to lower-level code.</p></li><li><p>Demonstrated ability to optimize network protocols or systems: latency, throughput, etc.</p></li><li><p>Familiarity with advanced networking concepts.</p></li></ul><ul><li><p>Past contributions to OSS projects, especially in P2P or decentralized tech<br></p></li></ul><h3><strong>Why Holepunch?</strong></h3><p>At Holepunch, you will:</p><p style=\"min-height: 1.7em;\"></p><ul><li><p>Work on groundbreaking technology that prioritizes user autonomy and privacy.</p></li><li><p>Collaborate with a team of thinkers and innovators dedicated to reshaping the digital landscape.</p></li><li><p>Contribute to a future where technology serves humanity, not the other way around.</p><p style=\"min-height: 1.7em;\"></p></li></ul><p>If you are driven by innovation and eager to build decentralized solutions that ",
+      "open_questions": [
+        {
+          "id": 2576094,
+          "position": 1,
+          "options": {},
+          "required": true,
+          "body": "Why are you interested in working at Holepunch?",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Why are you interested in working at Holepunch?"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576091,
+          "position": 2,
+          "options": {},
+          "required": true,
+          "body": "How do you rate your own skills with Node.js?",
+          "kind": "single_choice",
+          "translations": {
+            "en": {
+              "body": "How do you rate your own skills with Node.js?"
+            }
+          },
+          "open_question_options": [
+            {
+              "id": 3715540,
+              "position": 0,
+              "body": "Beginner",
+              "translations": {
+                "en": {
+                  "body": "Beginner"
+                }
+              }
+            },
+            {
+              "id": 3715541,
+              "position": 1,
+              "body": "Intermediate",
+              "translations": {
+                "en": {
+                  "body": "Intermediate"
+                }
+              }
+            },
+            {
+              "id": 3715542,
+              "position": 2,
+              "body": "Advanced",
+              "translations": {
+                "en": {
+                  "body": "Advanced"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 2576088,
+          "position": 3,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Do you have any experience with Chromium? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any experience with Chromium? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576092,
+          "position": 4,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Do you have any experience working with modular code based and making npm modules? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any experience working with modular code based and making npm modules? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576087,
+          "position": 5,
+          "options": {},
+          "required": true,
+          "body": "Do you have any knowledge of networking protocols and distributed systems? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any knowledge of networking protocols and distributed systems? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 4301703,
+          "position": 6,
+          "options": {},
+          "required": false,
+          "body": "Do you have any knowledge of networking protocols and distributed systems? If so, give a brief overview",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Do you have any knowledge of networking protocols and distributed systems? If so, give a brief overview"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576093,
+          "position": 7,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Useful links (e.g. GitHub)",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Useful links (e.g. GitHub)"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576090,
+          "position": 8,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Tell us about an interesting project you worked on recently (could be spare time open source project)",
+          "kind": "text",
+          "translations": {
+            "en": {
+              "body": "Tell us about an interesting project you worked on recently (could be spare time open source project)"
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576096,
+          "position": 9,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Considering the role is remote, from which country will you be working? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Considering the role is remote, from which country will you be working? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576097,
+          "position": 10,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Do you have any remote working experience? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Do you have any remote working experience? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576098,
+          "position": 11,
+          "options": {
+            "length": 120
+          },
+          "required": true,
+          "body": "Should we offer you a position, when can you start? ",
+          "kind": "string",
+          "translations": {
+            "en": {
+              "body": "Should we offer you a position, when can you start? "
+            }
+          },
+          "open_question_options": []
+        },
+        {
+          "id": 2576095,
+          "position": 12,
+          "options": {
+            "currency": "USD"
+          },
+          "required": true,
+          "body": "What is your expected salary? (annual USD)",
+          "kind": "salary",
+          "translations": {
+            "en": {
+              "body": "What is your expected salary? (annual USD)"
+            }
+          },
+          "open_question_options": []
+        }
+      ],
+      "country": "Kenya",
+      "sharing_description": "Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site. We are no longer reviewing applications submitted through this page.Please apply for th",
+      "title": "Senior Node.js Software Engineer (100% Remote, Worldwide)",
+      "tags": [],
+      "sharing_image": null,
+      "max_hours_per_week": "40.0",
+      "country_code": "KE",
+      "department": "Engineering",
+      "slug": "senior-node-engineer",
+      "locations": [
+        {
+          "id": 247063,
+          "name": "Kenya",
+          "state": "Nairobi City",
+          "country": "Kenya",
+          "city": "Kenya",
+          "translations": {
+            "en": {
+              "name": "Kenya",
+              "city": "Kenya",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "KE",
+          "state_code": "30",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 184120,
+          "name": "Lithuania > Vilnius",
+          "state": "Vilniaus apskritis",
+          "country": "Lithuania",
+          "city": "Vilniaus",
+          "translations": {
+            "en": {
+              "name": "Lithuania > Vilnius",
+              "city": "Vilniaus",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "LT",
+          "state_code": "VL",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 252272,
+          "name": "Nigeria",
+          "state": "Gombe",
+          "country": "Nigeria",
+          "city": "Nikeria",
+          "translations": {
+            "en": {
+              "name": "Nigeria",
+              "city": "Nikeria",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "NG",
+          "state_code": "GO",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 259054,
+          "name": "Poland",
+          "state": "Pomorskie",
+          "country": "Poland",
+          "city": "Warsaw",
+          "translations": {
+            "en": {
+              "name": "Poland",
+              "city": "Warsaw",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "PL",
+          "state_code": "22",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        },
+        {
+          "id": 259070,
+          "name": "Poland",
+          "state": "Warmińsko-Mazurskie",
+          "country": "Poland",
+          "city": "Warsaw",
+          "translations": {
+            "en": {
+              "name": "Poland",
+              "city": "Warsaw",
+              "postal_code": null,
+              "street": null,
+              "note": null
+            }
+          },
+          "country_code": "PL",
+          "state_code": "28",
+          "postal_code": null,
+          "street": null,
+          "note": null
+        }
+      ],
+      "description": "<p class=\"PDq2pG_selectionAnchorContainer\" style=\"text-align:start;\">Holepunch is now part of Tether, and applications for this role are being managed through Tether’s careers site.&nbsp;<strong>We are no longer reviewing applications submitted through this page.</strong></p><p style=\"text-align:start;\">Please apply for the same role through Tether here:&nbsp;<a rel=\"noopener\" target=\"_blank\" href=\"https://careers.tether.io/o/senior-nodejs-software-engineer-holepunch-100-remote-worldwide\">https://careers.tether.io/o/senior-nodejs-software-engineer-holepunch-100-remote-worldwide</a></p><p><br></p><h4><strong>Join Our Mission: Software Engineer - Node (100% Remote)</strong></h4><p>We are seeking a talented and motivated <a rel=\"noopener\" target=\"_blank\" href=\"http://Node.js\">Node.js</a> Software Engineer to join our dynamic team. In this role, you will be responsible for developing and maintaining our P2P stack and expanding our ecosystem, which includes over 1500 public npm modules and robust, modular codebase.</p>",
+      "location_question_visible": false,
+      "on_site": false,
+      "remote": true,
+      "location": "Remote job",
+      "guid": "29bpn",
+      "careers_url": "https://holepunch.recruitee.com/o/senior-node-engineer",
+      "education_code": "bachelor_degree",
+      "locations_question": "What is your preferred work location?",
+      "id": 1746977,
+      "careers_apply_url": "https://holepunch.recruitee.com/o/senior-node-engineer/c/new",
+      "options_salutation": "off",
+      "options_phone": "off",
+      "sharing_title": "Senior Node.js Software Engineer (100% Remote, Worldwide)",
+      "dynamic_fields": [],
+      "employment_type_code": "fulltime_permanent",
+      "company_name": "Holepunch",
+      "status": "published",
+      "category_code": "internet"
+    }
+  ]
+}

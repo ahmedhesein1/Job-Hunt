@@ -1,0 +1,11 @@
+{
+  "name": "job-finder-browser-layer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lambda layer: headless Chromium for JavaScript-rendered career pages (plan §5.7). x86_64 only.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@sparticuz/chromium": "153.0.0",
+    "playwright-core": "1.65.0"
+  }
+}
