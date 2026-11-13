@@ -11,7 +11,7 @@ import { applyOutcome } from '../scraping/circuit-breaker';
 import type { Outcome } from '../scraping/retry-policy';
 import type { ExternalJob } from '../sources/contract';
 import { parseLinkedInAlert } from '../sources/email/linkedin';
-import { notifyBreakerTransition } from './sync-source';
+import { notifyBreakerTransition } from '../notifications/breaker-alert';
 import { withUsage } from '../lib/usage';
 
 /**

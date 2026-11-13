@@ -44,11 +44,6 @@ export interface ExternalJob {
   via?: string | undefined;
   /** Saved search labels that matched this job during search evaluation. */
   matchedSearches?: string[] | undefined;
-  /**
-   * Set when the job is already stored (searches over stored jobs): the job is tagged with
-   * its matches instead of being processed again.
-   */
-  storedJobId?: string | undefined;
   /** Employment type if exposed by source (e.g. full-time, contract). */
   employmentType?: string | undefined;
   /** Explicit experience level if exposed by source. */

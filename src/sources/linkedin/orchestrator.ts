@@ -10,6 +10,8 @@ export type SearchStatus =
   | 'AUTH_REQUIRED'
   | 'PROVIDER_UNAVAILABLE'
   | 'FAILED'
+  /** The provider's response was not understood (e.g. a page layout change). */
+  | 'UNPARSEABLE'
   /** Not started: an earlier search stopped the provider for this cycle. */
   | 'PROVIDER_STOPPED'
   /** Not started or abandoned: the cycle deadline was reached. Retried next cycle. */
@@ -45,14 +47,17 @@ export interface CycleResult {
   provider: string | undefined;
   /** Jobs the provider searched this cycle, when it reports it. */
   searched?: number | undefined;
+  /** Items the provider could not read this cycle, when it reports it. */
+  malformed?: number | undefined;
 }
 
-const STOPPING: Record<string, SearchStatus> = { BLOCKED: 'BLOCKED', AUTH: 'AUTH_REQUIRED', RATE_LIMITED: 'RATE_LIMITED' };
+const STOPPING: Record<string, SearchStatus> = { BLOCKED: 'BLOCKED', AUTH: 'AUTH_REQUIRED', RATE_LIMITED: 'RATE_LIMITED', BAD_CONTENT: 'UNPARSEABLE' };
 
 /**
  * Runs every saved search once: bounded concurrency, bounded retries with exponential
  * backoff and full jitter for transient errors, a global deadline, and an immediate stop
- * for the provider on a block, auth failure or rate limit (never retried or bypassed).
+ * for the provider on a block, auth failure, rate limit or unreadable response (never
+ * retried or bypassed).
  * Every search gets an outcome; nothing is skipped silently.
  */
 export async function runSearchCycle(searches: readonly LinkedInSearch[], provider: LinkedInSearchProvider | undefined, opts: CycleOptions): Promise<CycleResult> {
@@ -83,7 +88,7 @@ export async function runSearchCycle(searches: readonly LinkedInSearch[], provid
       try {
         const found = await provider.search(search, signal);
         for (const job of found) {
-          const key = job.storedJobId ?? `${job.sourceId}#${job.sourceJobId}`;
+          const key = `${job.sourceId}#${job.sourceJobId}`;
           const existing = jobs.get(key);
           if (existing) {
             duplicates += 1;
@@ -128,6 +133,7 @@ export async function runSearchCycle(searches: readonly LinkedInSearch[], provid
     jobs: [...jobs.values()],
     duplicates,
     searched: provider.searched?.(),
+    malformed: provider.malformed?.(),
   };
 }
 

@@ -18,7 +18,8 @@ import {
 import { logger } from '../lib/logger';
 import { MINUTE_MS } from '../lib/time';
 import { escapeHtml } from '../notifications/formatting';
-import { applyOutcome, isBlocked, type BreakerTransition } from '../scraping/circuit-breaker';
+import { notifyBreakerTransition } from '../notifications/breaker-alert';
+import { applyOutcome, isBlocked } from '../scraping/circuit-breaker';
 import { DomainGate, GateClosedError } from '../scraping/domain-gate';
 import { Fetcher, SourceHttpError } from '../scraping/fetcher';
 import type { Outcome } from '../scraping/retry-policy';
@@ -45,15 +46,6 @@ export const ADAPTERS: Record<SyncableSourceId, SourceAdapter> = {
   // Rendered pages run in the separate browser function (sync-rendered-pages).
   'career-pages-js': { id: 'career-pages-js', fetch: async () => ({ kind: 'skipped', reason: 'runs in the browser function' }) },
 };
-
-export async function notifyBreakerTransition(label: string, transition: BreakerTransition, nowMs: number): Promise<void> {
-  const icon = transition.to === 'CLOSED' ? '✅' : '⚠️';
-  await putTextNotification(
-    `breaker:${label}:${transition.to}:${nowMs}`,
-    `${icon} <b>${escapeHtml(label)}</b>: ${escapeHtml(transition.message)}`,
-    nowMs,
-  );
-}
 
 function summary(runId: string, startedAt: number, status: RunSummary['status'], stats?: PipelineStats, detail?: string): RunSummary {
   return {

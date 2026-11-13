@@ -16,7 +16,7 @@ import { DAY_MS, MINUTE_MS } from '../lib/time';
 import { DomainGate, GateClosedError } from '../scraping/domain-gate';
 import { Fetcher, SourceHttpError } from '../scraping/fetcher';
 import { boardApiHost, fetchBoard } from '../sources/ats/common';
-import { notifyBreakerTransition } from './sync-source';
+import { notifyBreakerTransition } from '../notifications/breaker-alert';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { withUsage } from '../lib/usage';
 

@@ -26,6 +26,9 @@ export interface PipelineContext {
   onOutcome?: ((outcome: JobOutcome) => void) | undefined;
 }
 
+/** Explanation of a job that failed while being stored (e.g. throttling): worth retrying. */
+export const PROCESSING_FAILED = 'processing failed';
+
 export interface JobOutcome {
   sourceJobId: string;
   title: string;
@@ -186,7 +189,7 @@ export async function processJobs(externalJobs: ExternalJob[], ctx: PipelineCont
       report(external, { result: 'stored', explanation: `${explainEvaluation(evaluation)}${nodeUnverified ? ' · Node not verifiable (no description)' : ''}`, score: evaluation.score, confidence: evaluation.confidence, delivery });
     } catch (err) {
       stats.malformed += 1;
-      report(external, { result: 'malformed', explanation: 'processing failed' });
+      report(external, { result: 'malformed', explanation: PROCESSING_FAILED });
       logger.warn('job processing failed', { sourceId: external.sourceId, sourceJobId: external.sourceJobId, error: err });
     }
   }

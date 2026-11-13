@@ -178,30 +178,6 @@ export async function insertJob(input: InsertJobInput): Promise<InsertResult> {
 }
 
 /** §8 step 12: record that a duplicate was also seen on another source (once per source). */
-/**
- * Records which saved searches matched a stored job. Set once (the first cycle that sees
- * the job has the complete list); overlapping later cycles leave it unchanged.
- * Returns false when the job is gone or already tagged.
- */
-export async function recordSearchMatches(jobId: string, labels: string[]): Promise<boolean> {
-  if (labels.length === 0) return false;
-  try {
-    await ddb().send(
-      new UpdateCommand({
-        TableName: tableName(),
-        Key: keys.job(jobId),
-        UpdateExpression: 'SET matchedSearches = :labels',
-        ConditionExpression: 'attribute_exists(PK) AND attribute_not_exists(matchedSearches)',
-        ExpressionAttributeValues: { ':labels': labels },
-      }),
-    );
-    return true;
-  } catch (err) {
-    if (isConditionalCheckFailed(err)) return false;
-    throw err;
-  }
-}
-
 export async function attachDuplicate(existingJobId: string, sourceId: string, url: string): Promise<boolean> {
   try {
     await ddb().send(

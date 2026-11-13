@@ -348,7 +348,8 @@ export const sources: Record<SourceId, SourcePolicy> = {
     name: "LinkedIn searches (every 3 min)",
     method: "web-scrape",
     // Owner requirement 2026-11-13: the saved searches are scraped from LinkedIn's
-    // logged-out results endpoint every 3 minutes (src/sources/linkedin/linkedIn-adapter.ts).
+    // logged-out results endpoint; each search runs as often as its date window needs
+    // (limits.linkedinSearch.searchIntervalMinutes; src/handlers/linkedin-orchestrator.ts).
     enabled: true,
     minIntervalMinutes: 0,
     allowedHosts: ["www.linkedin.com", "linkedin.com"],

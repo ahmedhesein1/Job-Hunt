@@ -22,11 +22,6 @@ export const limits = {
   domainGate: {
     /** §5.4: internal starting setting, not a claimed provider limit. */
     defaultMinGapMs: 1_500,
-    /**
-     * Per-host overrides of defaultMinGapMs. linkedin.com (owner decision 2026-11-13): a
-     * short gap so every saved search (~0.9 s each) fits in one 45 s cycle.
-     */
-    hostMinGapMs: { 'www.linkedin.com': 250 } as Readonly<Record<string, number>>,
     leaseMs: 90_000,
     /** Max time a run waits for its *own* host spacing before deferring. */
     maxInlineWaitMs: 3_000,
@@ -99,37 +94,50 @@ export const limits = {
     jobEvent: 60,
   },
   linkedinSearch: {
-    /** Owner requirement: every saved search is considered once per 3-minute cycle. */
+    /** One cycle every 3 minutes; each runs the searches that are due (searchIntervalMinutes). */
     cycleMinutes: 3,
-    /** Cycle-wide cap on searches in flight (a provider may set a lower one). */
+    /**
+     * Run interval per search by its date-posted window: past-hour searches every cycle,
+     * 24 h ones every 15 min, week ones hourly. With pagination (scrapeMaxPagesPerSearch)
+     * nothing is missed between runs. ~140 search requests/hour for the 37 searches.
+     * Measured 2026-11-13: all searches every 3 minutes (~12 requests/min) drew HTTP 429
+     * after 2–3 cycles and ~15-minute cooldowns.
+     */
+    searchIntervalMinutes: { 'past-hour': 3, 'past-24h': 15, 'past-week': 60, 'past-month': 120, any: 120 },
+    /** A search counts as due this long before its interval ends (cycle start jitter). */
+    dueSlackMs: 60_000,
+    /** Most searches started per cycle (the most overdue first); the rest wait a cycle. */
+    maxSearchesPerCycle: 10,
+    /** Cycle-wide cap on searches in flight (the scraper allows one at a time). */
     concurrency: 4,
-    /** Stop starting or retrying searches this long into the 60 s invocation. */
-    deadlineMs: 45_000,
+    /**
+     * No search starts or continues after this, 35 s into the 60 s invocation; the job
+     * detail requests run until detailDeadlineMs, then the pipeline stores the results.
+     */
+    deadlineMs: 35_000,
+    /** Job detail requests (descriptions) stop this long into the invocation. */
+    detailDeadlineMs: 45_000,
+    /** Most job detail requests per cycle, newest jobs first; the rest keep card data. */
+    detailFetchesPerCycle: 8,
     /**
      * Whole-search retries by the cycle. 0: the scraper's HTTP retries
      * (scrapeTransientRetries) are the only retry layer, so a failing search costs at most
-     * 1 + scrapeTransientRetries requests.
+     * 1 + scrapeTransientRetries requests per page.
      */
     maxRetries: 0,
     backoffBaseMs: 1_000,
-    /** Re-read overlap: longest collector run (rendered pages, 180 s) plus margin. */
-    windowOverlapMs: 4 * 60_000,
-    /** First cycle ever: search the last day of stored jobs. */
-    firstWindowMs: 24 * 60 * 60_000,
     /**
-     * Guest-endpoint requests per search per cycle. Requests to linkedin.com go one at a
-     * time through the domain gate (domainGate.hostMinGapMs apart).
+     * Results pages read per search: further pages only while every card on a page is new
+     * (results are newest first). Requests to linkedin.com go one at a time through the
+     * domain gate (domainGate.defaultMinGapMs apart).
      */
-    scrapePagesPerSearch: 1,
+    scrapeMaxPagesPerSearch: 3,
     /** In-request retries of a 5xx/network failure (backoff ~1–2 s); the only retry layer. */
     scrapeTransientRetries: 1,
-    /** Response cap for one guest results page (normally well under 200 KB). */
+    /** Response cap for one guest results or job page (normally well under 200 KB). */
     scrapeMaxPageBytes: 2 * 1024 * 1024,
-    /**
-     * The search order rotates so every search leads a cycle at least once in this many
-     * cycles; searches cut off by the deadline run first in a later cycle.
-     */
-    rotateOverCycles: 3,
+    /** Unreadable cards above this share of a cycle's cards (min. 10 cards) pause the source. */
+    maxMalformedRatio: 0.5,
   },
   linkedinSnapshot: {
     /** Telegram lets bots download files up to 20 MB; saved result pages are far smaller. */
