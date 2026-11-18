@@ -111,12 +111,25 @@ export function buildLinkedInSearchUrl(search: LinkedInSearch, page = 0): string
 /** LinkedIn serves at most 1,000 results per search. */
 const MAX_START = 1000;
 
+/** Keyword clause that stands in for the remote filter on the guest endpoint. */
+export const REMOTE_KEYWORDS = '(Remote OR "Work from home" OR "Work from anywhere")';
+
+/**
+ * Keywords for the guest endpoint. It ignores the workplace filter (f_WT; verified
+ * 2026-11-17), so a remote-only search also requires remote wording in the posting; the
+ * scraper still checks each job's own text before treating it as remote.
+ */
+export function guestKeywords(search: LinkedInSearch): string {
+  const remoteOnly = (search.workplace ?? []).length > 0 && search.workplace!.every((w) => w === 'remote');
+  return remoteOnly ? `(${search.keywords}) AND ${REMOTE_KEYWORDS}` : search.keywords;
+}
+
 /**
  * Guest-endpoint URL for the cards starting at result `start` (0-based). The endpoint's
  * page size varies, so callers advance `start` by the number of cards actually returned.
  */
 export function buildLinkedInGuestSearchUrl(search: LinkedInSearch, start = 0): string {
-  const params = searchParams(search);
+  const params = searchParams({ ...search, keywords: guestKeywords(search) });
   if (!Number.isInteger(start) || start < 0 || start >= MAX_START) throw new InvalidSearchError(`start must be an integer from 0 to ${MAX_START - 1}`);
   params.set('start', String(start));
   return `${GUEST_BASE}?${params.toString()}`;

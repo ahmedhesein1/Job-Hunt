@@ -124,9 +124,14 @@ describe('pipeline must-pass scenarios (§16)', () => {
 describe('delivery policy (§10.4)', () => {
   const base = { score: 85, confidence: 0.8, publishedAt: new Date(NOW - 3_600_000).toISOString(), publishedAtReliable: true, bootstrapped: true };
   it('instant for ≥80 outside quiet hours', () => expect(decideDelivery(base, defaultSettings(), NOW)).toBe('INSTANT'));
-  it('digest during quiet hours (00:00–08:00 Cairo)', () => {
+  it('instant at night by default: no quiet hours (owner decision 2026-11-17)', () => {
     const night = Date.parse('2026-11-10T01:00:00Z'); // 03:00 Cairo
-    expect(decideDelivery({ ...base, publishedAt: new Date(night - 3_600_000).toISOString() }, defaultSettings(), night)).toBe('DIGEST');
+    expect(decideDelivery({ ...base, publishedAt: new Date(night - 3_600_000).toISOString() }, defaultSettings(), night)).toBe('INSTANT');
+  });
+  it('digest during quiet hours when they are configured', () => {
+    const night = Date.parse('2026-11-10T01:00:00Z'); // 03:00 Cairo
+    const settings = { ...defaultSettings(), quietHours: { startHour: 0, endHour: 8 } };
+    expect(decideDelivery({ ...base, publishedAt: new Date(night - 3_600_000).toISOString() }, settings, night)).toBe('DIGEST');
   });
   it('digest when paused, for 60–79, none below 60 or low confidence', () => {
     expect(decideDelivery(base, { ...defaultSettings(), paused: true }, NOW)).toBe('DIGEST');

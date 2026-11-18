@@ -32,7 +32,17 @@ const COUNTRY_TERMS: Record<string, string[]> = {
     'egypt', 'cairo', 'giza', 'alexandria', 'new cairo', 'smart village', 'maadi', 'nasr city', 'heliopolis',
     'sheikh zayed', '6th of october', 'october city', 'new capital', 'mansoura', 'tanta', 'zagazig', 'assiut',
     'ismailia', 'port said', 'suez', 'hurghada', 'luxor', 'aswan',
-    'مصر', 'القاهرة', 'الجيزة', 'الإسكندرية', 'الاسكندرية',
+    // Other cities, governorates and business districts (an on-site job at a location not
+    // recognised as Egyptian is rejected, so these must be complete enough).
+    'damietta', 'minya', 'sohag', 'qena', 'beni suef', 'fayoum', 'faiyum', 'kafr el sheikh', 'damanhour',
+    'beheira', 'sharqia', 'dakahlia', 'gharbia', 'menoufia', 'monufia', 'qalyubia', 'banha', 'benha',
+    'shubra', 'el obour', 'obour', '10th of ramadan', 'tenth of ramadan', 'sadat city', 'badr city',
+    'el shorouk', 'shorouk', 'rehab', 'madinaty', 'zamalek', 'dokki', 'mohandessin', 'katameya',
+    'fifth settlement', '5th settlement', 'tagamoa', 'new giza', 'new administrative capital',
+    'el gouna', 'sharm el sheikh', 'marsa alam', 'dahab', 'arish', 'marsa matrouh', 'ain sokhna',
+    'مصر', 'القاهرة', 'الجيزة', 'الإسكندرية', 'الاسكندرية', 'المنصورة', 'طنطا', 'أسيوط', 'الزقازيق',
+    'الإسماعيلية', 'بورسعيد', 'السويس', 'الغردقة', 'الأقصر', 'أسوان', 'دمياط', 'المنيا', 'سوهاج',
+    'بني سويف', 'الفيوم', 'كفر الشيخ', 'دمنهور', 'بنها', 'التجمع', 'الشيخ زايد', 'العاصمة الإدارية',
   ],
   // Gulf (GCC)
   SA: [
@@ -272,6 +282,11 @@ export function evaluateEligibility(input: EligibilityInput, profile: SearchProf
   // unset rather than false.
   if (locClass.nonEgyptPlace) {
     return { status: 'EXCLUDED', remoteScope: location, eligibleRegions: [], reason: `on-site in ${location}` };
+  }
+  // The source says the job is not remote and its location is not recognised as Egypt:
+  // on-site or hybrid somewhere else (owner decision 2026-11-17: outside Egypt, remote only).
+  if (input.remote === false && location) {
+    return { status: 'EXCLUDED', remoteScope: location, eligibleRegions: [], reason: `not remote, outside Egypt (${location})` };
   }
   return { status: 'UNKNOWN', remoteScope: location || 'Unknown location', eligibleRegions: [] };
 }

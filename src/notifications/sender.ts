@@ -1,11 +1,11 @@
 import { getJob, setJobNotified } from '../data/jobs';
-import { getNotification, markFailed, markSent, recordAttempt } from '../data/outbox';
-import { getSettings } from '../data/settings';
+import { getNotification, markFailed, markSent, putSharedCopies, recordAttempt } from '../data/outbox';
+import { getSettings, type Settings } from '../data/settings';
 import { deferSendSlot, recordSuccessfulSend, reserveSendSlot } from '../data/telegram-updates';
 import { logger } from '../lib/logger';
 import { telegramChatId } from '../lib/secrets';
 import { sendMessage, TelegramError, type InlineKeyboard } from '../telegram/bot';
-import { alertKeyboard } from '../telegram/keyboards';
+import { alertKeyboard, sharedAlertKeyboard } from '../telegram/keyboards';
 import { formatJobAlert } from './formatting';
 import { delayMessage } from './queue';
 
@@ -23,6 +23,10 @@ export async function deliverNotification(notificationId: string, receiptHandle:
   // Duplicate SQS deliveries after SENT/FAILED are acknowledged without sending.
   if (notification.status === 'SENT' || notification.status === 'FAILED') return { kind: 'done', detail: `already ${notification.status}` };
 
+  // A friend's copy goes to its recipient; everything else to the owner's chat.
+  const shared = notification.recipientChatId !== undefined;
+  const chatId = notification.recipientChatId ?? telegramChatId();
+  let settings: Settings | undefined;
   let text: string;
   let markup: InlineKeyboard | undefined;
   let jobId: string | undefined;
@@ -33,13 +37,19 @@ export async function deliverNotification(notificationId: string, receiptHandle:
       await markFailed(notificationId, 'job unavailable');
       return { kind: 'done', detail: 'job unavailable' };
     }
-    const settings = await getSettings();
-    if (settings.mutedCompanies.has(job.companyKey) || job.userStatus !== 'New') {
-      await markFailed(notificationId, job.userStatus !== 'New' ? `skipped: already ${job.userStatus}` : 'skipped: company muted');
-      return { kind: 'done', detail: 'skipped' };
+    if (shared) {
+      // The owner's alert passed the mute and status checks when this copy was made; what the
+      // owner does with the job afterwards (applied, dismissed) does not concern the friend.
+      markup = sharedAlertKeyboard(job.applyUrl);
+    } else {
+      settings = await getSettings();
+      if (settings.mutedCompanies.has(job.companyKey) || job.userStatus !== 'New') {
+        await markFailed(notificationId, job.userStatus !== 'New' ? `skipped: already ${job.userStatus}` : 'skipped: company muted');
+        return { kind: 'done', detail: 'skipped' };
+      }
+      markup = alertKeyboard(job.jobId, job.applyUrl);
     }
     text = formatJobAlert(job, now());
-    markup = alertKeyboard(job.jobId, job.applyUrl);
   } else {
     text = notification.text ?? '';
     markup = notification.replyMarkup ? (JSON.parse(notification.replyMarkup) as InlineKeyboard) : undefined;
@@ -49,7 +59,13 @@ export async function deliverNotification(notificationId: string, receiptHandle:
     }
   }
 
-  const chatId = telegramChatId();
+  // Job alerts and digests also go to the owner's friends (/friends): one outbox copy each,
+  // created before the owner's send so a failure here is retried without a double send.
+  if (!shared && notification.shareable) {
+    const friends = [...(settings ?? (await getSettings())).shareChatIds].filter((id) => id !== chatId);
+    if (friends.length > 0) await putSharedCopies(notification, friends, now());
+  }
+
   // §10.1 step 6: reserve the chat's send slot; if not ready, delay via SQS visibility.
   const slot = await reserveSendSlot(chatId, now());
   if (!slot.ok) {
@@ -63,7 +79,7 @@ export async function deliverNotification(notificationId: string, receiptHandle:
     // A crash between send and this update can cause one duplicate (§10.3, at-least-once).
     await markSent(notificationId, messageId, sentAt);
     await recordSuccessfulSend(chatId, sentAt);
-    if (jobId) await setJobNotified(jobId, messageId, sentAt);
+    if (jobId && !shared) await setJobNotified(jobId, messageId, sentAt);
     return { kind: 'done', detail: 'sent' };
   } catch (err) {
     if (!(err instanceof TelegramError)) throw err;

@@ -77,9 +77,14 @@ export const limits = {
     minConfidence: 0.5,
     defaultInstantDailyCap: 30,
     staleAfterPublishMs: 72 * 60 * 60 * 1000,
-    quietHours: { startHour: 0, endHour: 8 },
+    /** No quiet hours (owner decision 2026-11-17): strong matches alert day and night. Equal hours = off. */
+    quietHours: { startHour: 0, endHour: 0 },
     digestMaxJobs: 20,
     digestJobsPerMessage: 5,
+    /** A friend added with /friends first gets the best jobs of this many days… */
+    friendCatchUpDays: 7,
+    /** …at most this many, best score first, in as few messages as fit. */
+    friendCatchUpMaxJobs: 30,
     reconcileMinAgeMs: 2 * 60 * 1000,
     reconcileMaxItems: 50,
     outboxPendingAlertCount: 10,
@@ -97,28 +102,43 @@ export const limits = {
     /** One cycle every 3 minutes; each runs the searches that are due (searchIntervalMinutes). */
     cycleMinutes: 3,
     /**
-     * Run interval per search by its date-posted window: past-hour searches every cycle,
-     * 24 h ones every 15 min, week ones hourly. With pagination (scrapeMaxPagesPerSearch)
-     * nothing is missed between runs. ~140 search requests/hour for the 37 searches.
-     * Measured 2026-11-13: all searches every 3 minutes (~12 requests/min) drew HTTP 429
-     * after 2–3 cycles and ~15-minute cooldowns.
+     * Run interval per search by its date-posted window; Egypt searches (on-site, hybrid and
+     * remote all qualify there) run more often than the rest (owner decision 2026-11-17).
+     * Egypt: 1 past-hour, 6 × 24 h, 6 × week ≈ 25 runs/hour; the other 24 ≈ 12 runs/hour.
+     * The ~37 runs an hour stay under the 40 the cycle allows (maxSearchesPerCycle × 20 cycles).
+     * Measured: ~12 requests/min drew HTTP 429 after 2–3 cycles (2026-11-13); 100–150
+     * requests/hour ran 11 hours, then LinkedIn blocked nearly every cycle for over a day,
+     * allowing ~5 requests after each cooldown (2026-11-16/17).
      */
-    searchIntervalMinutes: { 'past-hour': 3, 'past-24h': 15, 'past-week': 60, 'past-month': 120, any: 120 },
+    searchIntervalMinutes: {
+      egypt: { 'past-hour': 10, 'past-24h': 20, 'past-week': 360, 'past-month': 720, any: 720 },
+      other: { 'past-hour': 30, 'past-24h': 60, 'past-week': 720, 'past-month': 1440, any: 1440 },
+    },
     /** A search counts as due this long before its interval ends (cycle start jitter). */
     dueSlackMs: 60_000,
-    /** Most searches started per cycle (the most overdue first); the rest wait a cycle. */
-    maxSearchesPerCycle: 10,
+    /** Most searches started per cycle: Egypt first, then the most overdue; the rest wait. */
+    maxSearchesPerCycle: 2,
+    /**
+     * Results-page requests per cycle across its searches. Each started search keeps one
+     * for its first page; the rest go to further pages. With detailFetchesPerCycle, at
+     * most 5 requests to linkedin.com per 3-minute cycle (typically ~50 an hour).
+     */
+    searchPagesPerCycle: 3,
     /** Cycle-wide cap on searches in flight (the scraper allows one at a time). */
     concurrency: 4,
     /**
-     * No search starts or continues after this, 35 s into the 60 s invocation; the job
+     * No search starts or continues after this, 32 s into the 60 s invocation; the job
      * detail requests run until detailDeadlineMs, then the pipeline stores the results.
      */
-    deadlineMs: 35_000,
+    deadlineMs: 32_000,
     /** Job detail requests (descriptions) stop this long into the invocation. */
-    detailDeadlineMs: 45_000,
-    /** Most job detail requests per cycle, newest jobs first; the rest keep card data. */
-    detailFetchesPerCycle: 8,
+    detailDeadlineMs: 50_000,
+    /**
+     * Most job detail requests per cycle (Egypt first, then newest); the rest keep card data.
+     * Outside Egypt a job is accepted only when its text shows it is remote, which for most
+     * LinkedIn jobs only the job page does.
+     */
+    detailFetchesPerCycle: 2,
     /**
      * Whole-search retries by the cycle. 0: the scraper's HTTP retries
      * (scrapeTransientRetries) are the only retry layer, so a failing search costs at most
@@ -127,9 +147,9 @@ export const limits = {
     maxRetries: 0,
     backoffBaseMs: 1_000,
     /**
-     * Results pages read per search: further pages only while every card on a page is new
-     * (results are newest first). Requests to linkedin.com go one at a time through the
-     * domain gate (domainGate.defaultMinGapMs apart).
+     * Results pages read per search, within searchPagesPerCycle: further pages only while a
+     * page still holds jobs not seen before (results are in relevance order). Requests to
+     * linkedin.com go one at a time through the domain gate (domainGate.defaultMinGapMs apart).
      */
     scrapeMaxPagesPerSearch: 3,
     /** In-request retries of a 5xx/network failure (backoff ~1–2 s); the only retry layer. */

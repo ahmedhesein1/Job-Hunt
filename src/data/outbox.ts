@@ -26,10 +26,66 @@ export interface OutboxItem {
   telegramMessageId?: number | undefined;
   attempts?: number | undefined;
   failureReason?: string | undefined;
+  /** Also sent to the owner's friends (/friends): job alerts and digests only. */
+  shareable?: boolean | undefined;
+  /** TEXT shown to friends instead of `text` (without owner-only hints such as /top). */
+  shareText?: string | undefined;
+  /** Recipient of a friend's copy; absent for the owner's own notifications. */
+  recipientChatId?: string | undefined;
+  /** The owner's notification a friend's copy was made from. */
+  sharedFrom?: string | undefined;
 }
 
 export const jobNotificationId = (jobId: string) => stableId('notif-job', jobId);
 export const textNotificationId = (dedupeKey: string) => stableId('notif-text', dedupeKey);
+export const sharedNotificationId = (notificationId: string, chatId: string) => stableId('notif-share', notificationId, chatId);
+
+/**
+ * A TEXT notification for one friend only (e.g. the catch-up list sent when they are
+ * added). Returns false if one with the same dedupe key exists.
+ */
+export async function putFriendText(dedupeKey: string, chatId: string, text: string, nowMs: number): Promise<boolean> {
+  try {
+    await ddb().send(new PutCommand(outboxPut({ notificationId: textNotificationId(dedupeKey), kind: 'TEXT', text, recipientChatId: chatId }, nowMs)));
+    return true;
+  } catch (err) {
+    if (isConditionalCheckFailed(err)) return false;
+    throw err;
+  }
+}
+
+/**
+ * One PENDING copy of a shareable notification per friend, each with its own ID, so every
+ * recipient is delivered, retried and deduplicated on its own. Idempotent: an existing copy
+ * is left as it is. Returns the number of copies created.
+ */
+export async function putSharedCopies(original: OutboxItem, chatIds: Iterable<string>, nowMs: number): Promise<number> {
+  let created = 0;
+  for (const chatId of chatIds) {
+    try {
+      await ddb().send(
+        new PutCommand(
+          outboxPut(
+            {
+              notificationId: sharedNotificationId(original.notificationId, chatId),
+              kind: original.kind,
+              jobId: original.jobId,
+              score: original.score,
+              text: original.kind === 'TEXT' ? (original.shareText ?? original.text) : undefined,
+              recipientChatId: chatId,
+              sharedFrom: original.notificationId,
+            },
+            nowMs,
+          ),
+        ),
+      );
+      created += 1;
+    } catch (err) {
+      if (!isConditionalCheckFailed(err)) throw err;
+    }
+  }
+  return created;
+}
 
 /** Transaction/put item for a new PENDING outbox record (idempotent on its ID). */
 export function outboxPut(item: Omit<OutboxItem, 'status' | 'createdAt'>, nowMs: number) {

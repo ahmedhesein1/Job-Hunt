@@ -1,4 +1,6 @@
 import { parse, type HTMLElement } from 'node-html-parser';
+import { htmlToText } from '../../core/normalize';
+import { workplaceFromText } from '../../core/workplace';
 import type { ExternalJob } from '../contract';
 import { cleanText } from './search-page';
 
@@ -76,13 +78,19 @@ export function parseLinkedInJobDetail(html: string): LinkedInJobDetail | undefi
   };
 }
 
-/** The job with the detail page's description, seniority and employment type added. */
+/**
+ * The job with the detail page's description, seniority and employment type added, and
+ * its remote flag from the full text: title and location first, then explicit wording in
+ * the description ("fully remote", "work from home"; any hybrid/office wording wins).
+ */
 export function withJobDetail(job: ExternalJob, detail: LinkedInJobDetail): ExternalJob {
+  const workplace = workplaceFromText({ title: job.title, location: job.location, description: htmlToText(detail.descriptionHtml) });
   return {
     ...job,
     description: detail.descriptionHtml,
     descriptionIsHtml: true,
     seniorityHints: detail.seniorityHint ? [detail.seniorityHint] : job.seniorityHints,
     employmentType: detail.employmentType ?? job.employmentType,
+    remote: workplace ? workplace === 'remote' : job.remote,
   };
 }

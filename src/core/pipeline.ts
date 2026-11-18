@@ -160,7 +160,7 @@ export async function processJobs(externalJobs: ExternalJob[], ctx: PipelineCont
           fpHash: dup.useFingerprint ? job.fingerprint : undefined,
           notificationPut:
             d === 'INSTANT'
-              ? outboxPut({ notificationId: jobNotificationId(job.jobId), kind: 'JOB', jobId: job.jobId, clusterId: dup.clusterId, score: evaluation.score }, ctx.nowMs)
+              ? outboxPut({ notificationId: jobNotificationId(job.jobId), kind: 'JOB', jobId: job.jobId, clusterId: dup.clusterId, score: evaluation.score, shareable: true }, ctx.nowMs)
               : undefined,
           capUpdate: d === 'INSTANT' ? instantCapUpdate(today, settings) : undefined,
           nowMs: ctx.nowMs,

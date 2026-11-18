@@ -12,6 +12,11 @@ export interface Settings {
   maxInstantAlertsPerDay: number;
   mutedCompanies: Set<string>;
   activeBoards: number;
+  /**
+   * Private chats (Telegram user IDs) that also receive the job alerts and digests, set by
+   * the owner with /friends. They get no commands, buttons or system messages.
+   */
+  shareChatIds: Set<string>;
 }
 
 export function defaultSettings(): Settings {
@@ -23,6 +28,7 @@ export function defaultSettings(): Settings {
     maxInstantAlertsPerDay: limits.notifications.defaultInstantDailyCap,
     mutedCompanies: new Set(),
     activeBoards: 0,
+    shareChatIds: new Set(),
   };
 }
 
@@ -40,6 +46,7 @@ export async function getSettings(): Promise<Settings> {
     maxInstantAlertsPerDay: Number(item.maxInstantAlertsPerDay ?? d.maxInstantAlertsPerDay),
     mutedCompanies: item.mutedCompanies instanceof Set ? new Set([...item.mutedCompanies].map(String)) : new Set(),
     activeBoards: Number(item.activeBoards ?? 0),
+    shareChatIds: item.shareChatIds instanceof Set ? new Set([...item.shareChatIds].map(String)) : new Set(),
   };
 }
 
@@ -83,6 +90,22 @@ export function instantCapUpdate(today: string, current: Settings) {
       ExpressionAttributeValues: { ':one': 1, ':today': today, ':e': 'SETTINGS' },
     },
   };
+}
+
+/** Telegram user IDs: positive integers (private chats), at most 15 digits. */
+export const TELEGRAM_USER_ID = /^[1-9]\d{0,14}$/;
+
+/** Adds or removes a chat that receives shared job alerts and digests (/friends). */
+export async function setShareChat(chatId: string, shared: boolean): Promise<void> {
+  if (!TELEGRAM_USER_ID.test(chatId)) throw new Error(`invalid Telegram user ID: ${chatId}`);
+  await ddb().send(
+    new UpdateCommand({
+      TableName: tableName(),
+      Key: keys.settings(),
+      UpdateExpression: `${shared ? 'ADD' : 'DELETE'} shareChatIds :c SET entity = :e`,
+      ExpressionAttributeValues: { ':c': new Set([chatId]), ':e': 'SETTINGS' },
+    }),
+  );
 }
 
 /** Mute a company: COMPANY item + the muted set on settings, atomically. */

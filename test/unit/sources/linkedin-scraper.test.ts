@@ -8,9 +8,10 @@ import { DomainGate, InMemoryDomainGateStore } from '../../../src/scraping/domai
 import { Fetcher } from '../../../src/scraping/fetcher';
 import { HttpClient, type FetchLike } from '../../../src/scraping/http-client';
 import { classifyStatus } from '../../../src/scraping/retry-policy';
-import { buildLinkedInJobDetailUrl, parseLinkedInJobDetail } from '../../../src/sources/linkedin/job-detail';
+import { buildLinkedInJobDetailUrl, parseLinkedInJobDetail, withJobDetail } from '../../../src/sources/linkedin/job-detail';
 import {
   cardToSearchJob,
+  detailOrder,
   enrichWithJobDetails,
   isEmptyResultsBody,
   linkedInWebSearchProvider,
@@ -20,8 +21,8 @@ import {
 import { runSearchCycle, summarize } from '../../../src/sources/linkedin/orchestrator';
 import { ProviderError } from '../../../src/sources/linkedin/provider';
 import { cardMatchesFilters, type CardFacts } from '../../../src/sources/linkedin/search-match';
-import { parseLinkedInSearchPage } from '../../../src/sources/linkedin/search-page';
-import { buildLinkedInGuestSearchUrl, InvalidSearchError } from '../../../src/sources/linkedin/search-url';
+import { parseLinkedInSearchPage, type LinkedInCard } from '../../../src/sources/linkedin/search-page';
+import { buildLinkedInGuestSearchUrl, guestKeywords, InvalidSearchError, REMOTE_KEYWORDS } from '../../../src/sources/linkedin/search-url';
 import { fixtureText } from '../../helpers/fixtures';
 
 const NOW = Date.parse('2026-11-13T21:30:00Z');
@@ -99,11 +100,16 @@ describe('LinkedIn guest URLs', () => {
     expect(() => buildLinkedInJobDetailUrl('../x')).toThrow();
   });
 
-  it('every saved search builds a URL and is sorted newest first (pagination relies on it)', () => {
-    for (const s of linkedinSearches) {
-      expect(() => buildLinkedInGuestSearchUrl(s)).not.toThrow();
-      expect(s.sortByDate).toBe(true);
-    }
+  it('every saved search builds a guest URL', () => {
+    for (const s of linkedinSearches) expect(() => buildLinkedInGuestSearchUrl(s)).not.toThrow();
+  });
+
+  it('remote-only searches also require remote wording (LinkedIn ignores the workplace filter)', () => {
+    const remoteOnly: LinkedInSearch = { ...search, workplace: ['remote'] };
+    expect(guestKeywords(remoteOnly)).toBe(`(Backend) AND ${REMOTE_KEYWORDS}`);
+    expect(new URL(buildLinkedInGuestSearchUrl(remoteOnly)).searchParams.get('keywords')).toBe(`(Backend) AND ${REMOTE_KEYWORDS}`);
+    expect(guestKeywords({ ...search, workplace: ['on-site', 'hybrid'] })).toBe('Backend');
+    expect(guestKeywords(search)).toBe('Backend');
   });
 });
 
@@ -170,7 +176,7 @@ describe('LinkedIn web search provider', () => {
     });
   });
 
-  describe('pagination until caught up (#2)', () => {
+  describe('pagination until caught up (#2; results are in relevance order)', () => {
     const paged = () => {
       const starts: number[] = [];
       const fetcher = setup(async (url) => {
@@ -179,24 +185,51 @@ describe('LinkedIn web search provider', () => {
       });
       return { fetcher, starts };
     };
+    const seenIndexes = (from: number, to: number) => Array.from({ length: to - from }, (_, i) => cardUrl(from + i));
 
-    it('reads further pages while every card is new, up to the cap', async () => {
+    // A cycle with this search alone and pages to spare: only the per-search cap applies.
+    const solo = { pageBudget: limits.linkedinSearch.scrapeMaxPagesPerSearch, searchesPerCycle: 1 };
+
+    it('reads further pages while they hold new jobs, up to the cap', async () => {
       const { fetcher, starts } = paged();
-      const jobs = await linkedInWebSearchProvider(fetcher, { seen: seenStore(), clock: () => NOW }).search(search, signal());
+      const jobs = await linkedInWebSearchProvider(fetcher, { seen: seenStore(), clock: () => NOW, ...solo }).search(search, signal());
       expect(starts).toEqual([0, 10, 20].slice(0, limits.linkedinSearch.scrapeMaxPagesPerSearch));
       expect(jobs).toHaveLength(10 * limits.linkedinSearch.scrapeMaxPagesPerSearch);
     });
 
-    it('stops at the first page holding a job seen in an earlier cycle', async () => {
+    it('a page mixing seen and new jobs is not the end: relevance order scatters new ones', async () => {
       const { fetcher, starts } = paged();
-      const jobs = await linkedInWebSearchProvider(fetcher, { seen: seenStore([cardUrl(15)]), clock: () => NOW }).search(search, signal());
+      await linkedInWebSearchProvider(fetcher, { seen: seenStore([cardUrl(0), cardUrl(15)]), clock: () => NOW, ...solo }).search(search, signal());
+      expect(starts).toEqual([0, 10, 20].slice(0, limits.linkedinSearch.scrapeMaxPagesPerSearch));
+    });
+
+    it("keeps within the cycle's page budget, leaving each later search its first page", async () => {
+      const { fetcher, starts } = paged();
+      const provider = linkedInWebSearchProvider(fetcher, { seen: seenStore(), clock: () => NOW, pageBudget: 3, searchesPerCycle: 2 });
+      await provider.search(search, signal());
+      // Every page is new, but one of the three requests is kept for the second search.
       expect(starts).toEqual([0, 10]);
-      expect(jobs).toHaveLength(20); // the whole page is returned; the pipeline dedupes
+      await provider.search({ ...search, id: 'second' }, signal());
+      expect(starts).toEqual([0, 10, 0]);
+    });
+
+    it('defaults to at most searchPagesPerCycle results pages a cycle', async () => {
+      const { fetcher, starts } = paged();
+      const provider = linkedInWebSearchProvider(fetcher, { seen: seenStore(), clock: () => NOW });
+      for (let i = 0; i < limits.linkedinSearch.maxSearchesPerCycle; i++) await provider.search({ ...search, id: `s${i}` }, signal());
+      expect(starts.length).toBe(limits.linkedinSearch.searchPagesPerCycle);
+    });
+
+    it('stops after the first page whose jobs were all seen in an earlier cycle', async () => {
+      const { fetcher, starts } = paged();
+      const jobs = await linkedInWebSearchProvider(fetcher, { seen: seenStore(seenIndexes(10, 20)), clock: () => NOW }).search(search, signal());
+      expect(starts).toEqual([0, 10]);
+      expect(jobs).toHaveLength(20); // whole pages are returned; only new jobs reach the pipeline
     });
 
     it('a quiet search stays at one request', async () => {
       const { fetcher, starts } = paged();
-      await linkedInWebSearchProvider(fetcher, { seen: seenStore([cardUrl(0)]), clock: () => NOW }).search(search, signal());
+      await linkedInWebSearchProvider(fetcher, { seen: seenStore(seenIndexes(0, 10)), clock: () => NOW }).search(search, signal());
       expect(starts).toEqual([0]);
     });
 
@@ -218,7 +251,7 @@ describe('LinkedIn web search provider', () => {
       const saudi: LinkedInSearch = { id: 'saudi', label: 'Saudi', keywords: 'Backend', location: 'Saudi Arabia', easyApplyOnly: true, sortByDate: true };
       expect(await provider.search(saudi, signal())).toEqual([]);
       expect(seen.marked).toHaveLength(10);
-      expect(provider.note?.(saudi)).toBe("10 card(s) outside the search's filters dropped; applied by LinkedIn only: Easy Apply");
+      expect(provider.note?.(saudi)).toBe("10 card(s) outside the search's filters dropped; not checked on the job: Easy Apply");
     });
   });
 
@@ -317,14 +350,32 @@ describe('LinkedIn web search provider', () => {
     expect(Date.now() - started).toBeLessThan(5_000);
   });
 
-  it('marks cards from a remote-only search as remote when the card does not say', () => {
+  it('never assumes a job is remote because the search asked for remote (LinkedIn ignores f_WT)', () => {
     const card = { jobId: '4400000001', url: 'https://www.linkedin.com/jobs/view/4400000001/', title: 'Backend Engineer', company: 'Acme', location: 'United States', postedAtPrecise: false };
     const remoteOnly: LinkedInSearch = { ...search, workplace: ['remote'] };
-    expect(cardToSearchJob(card, remoteOnly).remote).toBe(true);
-    expect(cardToSearchJob(card, { ...search, workplace: ['on-site', 'hybrid'] }).remote).toBe(false);
-    expect(cardToSearchJob(card, { ...search, workplace: undefined }).remote).toBeUndefined();
-    // What the card states wins over the search filter.
-    expect(cardToSearchJob({ ...card, workplace: 'hybrid' }, remoteOnly).remote).toBe(false);
+    expect(cardToSearchJob(card, remoteOnly).remote).toBe(false);
+    // Only the job's own text or the card's marker makes it remote.
+    expect(cardToSearchJob({ ...card, title: 'Senior Backend Engineer - Remote' }, remoteOnly).remote).toBe(true);
+    expect(cardToSearchJob({ ...card, workplace: 'remote' }, search).remote).toBe(true);
+    expect(cardToSearchJob({ ...card, title: 'Software Engineer (Salt Lake City, UT Hybrid)' }, remoteOnly).remote).toBe(false);
+  });
+
+  it('an on-site/hybrid LinkedIn job outside Egypt is rejected; Egypt and remote ones are kept', () => {
+    const card = { jobId: '4400000001', url: 'https://www.linkedin.com/jobs/view/4400000001/', title: 'Backend Engineer', company: 'Acme', postedAtPrecise: false };
+    const remoteOnly: LinkedInSearch = { ...search, workplace: ['remote'] };
+    const eligibility = (over: Partial<LinkedInCard>) => normalizeJob(cardToSearchJob({ ...card, ...over }, remoteOnly), profiles[0]!, NOW).eligibility;
+    // Live leaks found 2026-11-17: all were alerted as "Remote (…)".
+    expect(eligibility({ location: 'Hyderabad, Telangana, India' })).toBe('EXCLUDED');
+    expect(eligibility({ location: 'Covington, KY' })).toBe('EXCLUDED');
+    expect(eligibility({ location: 'Greater Barcelona Metropolitan Area' })).toBe('EXCLUDED');
+    expect(eligibility({ location: 'Petersfield, England, United Kingdom' })).toBe('EXCLUDED');
+    expect(eligibility({ location: 'Sharjah, Sharjah Emirate, United Arab Emirates' })).toBe('EXCLUDED');
+    expect(eligibility({ location: 'Some Town, Nowhere' })).toBe('EXCLUDED');
+    // Egypt: any workplace. Elsewhere: only remote.
+    expect(eligibility({ location: 'Alexandria, Egypt' })).toBe('ELIGIBLE');
+    expect(eligibility({ location: 'Smouha, Alexandria Governorate' })).toBe('ELIGIBLE');
+    expect(eligibility({ location: 'Madinaty' })).toBe('ELIGIBLE');
+    expect(eligibility({ location: 'Argentina', title: 'Senior Full Stack Engineer (Node/React) - Remote' })).not.toBe('EXCLUDED');
   });
 
   it('maps unexpected errors to TRANSIENT', () => {
@@ -358,16 +409,39 @@ describe('job descriptions for new jobs (#4)', () => {
     expect(normalizeJob(jobs[0]!, profiles[0]!, NOW).hasDescription).toBe(false);
   });
 
-  it('fetches at most detailFetchesPerCycle, newest first', async () => {
+  it('fetches at most detailFetchesPerCycle, only for titles a profile can accept', async () => {
     let requests = 0;
     const fetcher = setup(async () => {
       requests += 1;
       return html(GUEST_JOB);
     });
     const result = await enrichWithJobDetails(fetcher, jobs, signal());
-    expect(requests).toBe(Math.min(jobs.length, limits.linkedinSearch.detailFetchesPerCycle));
+    expect(requests).toBe(Math.min(detailOrder(jobs).length, limits.linkedinSearch.detailFetchesPerCycle));
     expect(result.jobs).toHaveLength(jobs.length);
     expect(result.jobs.filter((j) => j.description).length).toBe(requests);
+  });
+
+  it('requests job pages for Egypt jobs first, then newest, and skips titles that cannot match', () => {
+    const at = (h: number) => new Date(NOW - h * 3_600_000).toISOString();
+    const j = (id: string, title: string, location: string, hoursAgo: number) => ({ ...jobs[0]!, sourceJobId: id, title, location, publishedAt: at(hoursAgo) });
+    const order = detailOrder([
+      j('1', 'Backend Engineer', 'Berlin, Germany', 1),
+      j('2', 'Backend Engineer', 'Cairo, Egypt', 5),
+      j('3', 'Marketing Manager', 'Cairo, Egypt', 1),
+      j('4', 'Node.js Developer', 'Alexandria, Egypt', 2),
+      j('5', 'Frontend Developer', 'Cairo, Egypt', 1),
+    ]).map((x) => x.sourceJobId);
+    expect(order).toEqual(['4', '2', '1']);
+  });
+
+  it('the job page decides whether a job outside Egypt is remote', () => {
+    const base = { ...jobs[0]!, location: 'Berlin, Germany', remote: false };
+    const detail = (text: string) => withJobDetail(base, { descriptionHtml: `<p>${text}</p>` }).remote;
+    expect(detail('This is a fully remote position open to candidates across EMEA.')).toBe(true);
+    expect(detail('We work from anywhere; our team is remote-first.')).toBe(true);
+    expect(detail('Hybrid: 3 days a week in our Berlin office.')).toBe(false);
+    expect(detail('Remote-friendly team, but this is an on-site role in Berlin.')).toBe(false);
+    expect(detail('Build scalable Node.js services for our customers.')).toBe(false); // says nothing: stays on-site
   });
 
   it('keeps the card when a job page fails or is not a job page', async () => {

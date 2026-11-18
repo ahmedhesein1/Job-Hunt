@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   markFailed: vi.fn(),
   markSent: vi.fn(),
   recordAttempt: vi.fn(),
+  putSharedCopies: vi.fn(),
   getJob: vi.fn(),
   setJobNotified: vi.fn(),
   getSettings: vi.fn(),
@@ -16,7 +17,7 @@ const m = vi.hoisted(() => ({
   delayMessage: vi.fn(),
 }));
 
-vi.mock('../../../src/data/outbox', () => ({ getNotification: m.getNotification, markFailed: m.markFailed, markSent: m.markSent, recordAttempt: m.recordAttempt }));
+vi.mock('../../../src/data/outbox', () => ({ getNotification: m.getNotification, markFailed: m.markFailed, markSent: m.markSent, recordAttempt: m.recordAttempt, putSharedCopies: m.putSharedCopies }));
 vi.mock('../../../src/data/jobs', () => ({ getJob: m.getJob, setJobNotified: m.setJobNotified }));
 vi.mock('../../../src/data/settings', () => ({ getSettings: m.getSettings }));
 vi.mock('../../../src/data/telegram-updates', () => ({ reserveSendSlot: m.reserveSendSlot, deferSendSlot: m.deferSendSlot, recordSuccessfulSend: m.recordSuccessfulSend }));
@@ -35,7 +36,8 @@ describe('Telegram sender (§10.1)', () => {
     m.getNotification.mockResolvedValue({ notificationId: ID, kind: 'TEXT', status: 'QUEUED', text: 'hello', createdAt: '' });
     m.reserveSendSlot.mockResolvedValue({ ok: true });
     m.sendMessage.mockResolvedValue(42);
-    m.getSettings.mockResolvedValue({ mutedCompanies: new Set() });
+    m.getSettings.mockResolvedValue({ mutedCompanies: new Set(), shareChatIds: new Set() });
+    m.putSharedCopies.mockResolvedValue(0);
   });
 
   it('sends and marks SENT with the Telegram message id', async () => {
@@ -88,5 +90,48 @@ describe('Telegram sender (§10.1)', () => {
     await deliverNotification(ID, 'rh', () => NOW);
     expect(m.sendMessage).not.toHaveBeenCalled();
     expect(m.markFailed).toHaveBeenCalledWith(ID, 'skipped: company muted');
+  });
+
+  describe('friends (/friends)', () => {
+    const job = { jobId: 'j1', companyKey: 'acme', userStatus: 'New', title: 'Backend Engineer', company: 'Acme', applyUrl: 'https://jobs.lever.co/acme/1', score: 90, discoveredAt: '', skills: [], remoteScope: 'Cairo, Egypt' };
+    const keyboardOf = () => m.sendMessage.mock.calls[0]![2] as { inline_keyboard: Array<Array<{ text: string; url?: string; callback_data?: string }>> };
+
+    it("copies the owner's job alert for each friend before sending it, never to the owner again", async () => {
+      const alert = { notificationId: ID, kind: 'JOB', status: 'QUEUED', jobId: 'j1', shareable: true };
+      m.getNotification.mockResolvedValue(alert);
+      m.getJob.mockResolvedValue(job);
+      m.getSettings.mockResolvedValue({ mutedCompanies: new Set(), shareChatIds: new Set(['555', '123456789']) });
+      await deliverNotification(ID, 'rh', () => NOW);
+      expect(m.putSharedCopies).toHaveBeenCalledWith(alert, ['555'], NOW);
+      expect(m.putSharedCopies.mock.invocationCallOrder[0]!).toBeLessThan(m.sendMessage.mock.invocationCallOrder[0]!);
+      expect(m.sendMessage).toHaveBeenCalledWith('123456789', expect.any(String), expect.anything());
+      expect(keyboardOf().inline_keyboard.flat().some((b) => b.callback_data)).toBe(true);
+    });
+
+    it('retries without sending when the copies cannot be stored', async () => {
+      m.getNotification.mockResolvedValue({ notificationId: ID, kind: 'TEXT', status: 'QUEUED', text: 'digest', shareable: true });
+      m.getSettings.mockResolvedValue({ mutedCompanies: new Set(), shareChatIds: new Set(['555']) });
+      m.putSharedCopies.mockRejectedValue(new Error('throttled'));
+      await expect(deliverNotification(ID, 'rh', () => NOW)).rejects.toThrow('throttled');
+      expect(m.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('does not share system messages', async () => {
+      m.getSettings.mockResolvedValue({ mutedCompanies: new Set(), shareChatIds: new Set(['555']) });
+      await deliverNotification(ID, 'rh', () => NOW);
+      expect(m.putSharedCopies).not.toHaveBeenCalled();
+    });
+
+    it("sends a friend's copy to the friend with an Apply link only, whatever the owner did with the job", async () => {
+      m.getNotification.mockResolvedValue({ notificationId: ID, kind: 'JOB', status: 'QUEUED', jobId: 'j1', recipientChatId: '555', sharedFrom: 'b'.repeat(24) });
+      m.getJob.mockResolvedValue({ ...job, userStatus: 'Applied' });
+      const out = await deliverNotification(ID, 'rh', () => NOW);
+      expect(out.kind).toBe('done');
+      expect(m.sendMessage).toHaveBeenCalledWith('555', expect.any(String), expect.anything());
+      expect(keyboardOf()).toEqual({ inline_keyboard: [[{ text: 'Apply ↗', url: 'https://jobs.lever.co/acme/1' }]] });
+      expect(m.reserveSendSlot).toHaveBeenCalledWith('555', NOW);
+      expect(m.setJobNotified).not.toHaveBeenCalled();
+      expect(m.putSharedCopies).not.toHaveBeenCalled();
+    });
   });
 });

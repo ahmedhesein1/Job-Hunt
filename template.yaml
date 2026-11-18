@@ -364,7 +364,7 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
-              Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+              Action: [dynamodb:GetItem, dynamodb:UpdateItem, dynamodb:PutItem] # PutItem: friends' outbox copies
               Resource: !GetAtt JobsTable.Arn
             - Effect: Allow
               Action: [sqs:ChangeMessageVisibility]

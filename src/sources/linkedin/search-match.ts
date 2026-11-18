@@ -56,10 +56,12 @@ export interface CardFacts {
 const DATE_ONLY_SLACK_MS = 86_400_000;
 
 /**
- * Re-applies a saved search's filters to a card LinkedIn returned for it, using only what
- * the card states: a filter the card says nothing about passes (LinkedIn applied it to
- * data the card does not show). Keywords are not re-checked: LinkedIn matches them against
- * the full description, which cards do not include.
+ * Applies a saved search's filters to a card LinkedIn returned for it, using only what the
+ * card states; a filter the card says nothing about passes. The guest endpoint applies the
+ * keywords, location and date window, but ignores workplace, experience and sort
+ * (verified 2026-11-17), so experience is decided here from the title and remote-only
+ * searches rely on the job's own text (see linkedIn-adapter.ts and core/workplace.ts).
+ * Keywords are not re-checked: LinkedIn matches them against the full description.
  */
 export function cardMatchesFilters(card: CardFacts, search: LinkedInSearch, nowMs: number): boolean {
   // Location: only a country search against a card that names a country.
@@ -78,7 +80,7 @@ export function cardMatchesFilters(card: CardFacts, search: LinkedInSearch, nowM
   return experienceMatches(search, card.title);
 }
 
-/** Search filters that cards never state, so only LinkedIn's own filtering applies. */
+/** Search filters a card never states, so they are not checked on the job (noted per search). */
 export function cardUncheckableFilters(search: LinkedInSearch): string[] {
   const out: string[] = [];
   if (search.employmentTypes?.length) out.push('employment type');

@@ -146,6 +146,25 @@ export const careerPages: CareerPage[] = [
     ["wuzzuf-programmer", "Programmer-Jobs-in-Egypt"],
     ["wuzzuf-backend-uae", "Backend-Jobs-in-United-Arab-Emirates"],
   ]),
+  // Tactful AI (Cairo). Reviewed 2026-11-17: robots.txt allows all but /api/ and /admin;
+  // no terms page. Job pages carry JobPosting JSON-LD (remote, open to applicants in Egypt).
+  {
+    id: "tactful",
+    company: "Tactful AI",
+    listUrl: "https://tactful.ai/careers",
+    jobLinkPattern: "^https://tactful\\.ai/careers/(?!apply\\b)[a-z0-9-]+$",
+    termsReviewed: "2026-11-17",
+  },
+  // Penny (procurement SaaS; engineering roles "Saudi/Bahrain/Remote"). Reviewed
+  // 2026-11-17: robots.txt disallows only /wp-admin/ for all agents; terms say nothing
+  // about automated access. Jobs are server-rendered links under /jobs/.
+  {
+    id: "penny",
+    company: "Penny",
+    listUrl: "https://penny.co/careers/",
+    jobLinkPattern: "^https://penny\\.co/jobs/[a-z0-9-]+/?$",
+    termsReviewed: "2026-11-17",
+  },
   // Reviewed 2026-11-11: robots.txt disallows only wp-admin/login paths; no website terms.
   // The job list is rendered by React (no job links in the HTML): needs the browser.
   {
@@ -608,4 +627,15 @@ export const watchlistBoards: WatchlistBoard[] = [
   },
   { ats: "ashby", token: "ziina", company: "Ziina", priority: "normal" },
   { ats: "bamboohr", token: "nymcard", company: "NymCard", priority: "normal" },
+  // Egypt-based employers and Cairo engineering offices (owner request 2026-11-17). Each
+  // verified 2026-11-17 against the provider's public API: board name matched and open
+  // jobs located in Egypt returned. Searched without a usable public board: Paymob,
+  // Breadfast, Khazna, valU, MNT-Halan, Telda, MoneyHash, Sylndr, MaxAB, Fawry, Yodawy.
+  { ats: "workable", token: "integrant", company: "Integrant", priority: "high" },
+  { ats: "workable", token: "sumerge-1", company: "Sumerge", priority: "high" },
+  { ats: "lever", token: "incorta", company: "Incorta", priority: "high" },
+  { ats: "bamboohr", token: "dsquares", company: "Dsquares", priority: "high" },
+  { ats: "bamboohr", token: "bayut", company: "Bayut (dubizzle Egypt)", priority: "high" },
+  // Game publisher with a Cairo studio; no engineering roles open on 2026-11-17.
+  { ats: "workable", token: "tamatem", company: "Tamatem", priority: "normal" },
 ];

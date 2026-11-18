@@ -8,6 +8,10 @@ import { SourceHttpError, type Fetcher } from '../../scraping/fetcher';
 import { UnsafeUrlError } from '../../scraping/redirect-guard';
 import { buildLinkedInJobDetailUrl, parseLinkedInJobDetail, withJobDetail } from './job-detail';
 import { ProviderError, type EnrichResult, type LinkedInSearchProvider, type ProviderErrorKind } from './provider';
+import { profiles } from '../../../config/profiles';
+import { countriesIn } from '../../core/eligibility';
+import { matchingTerms, normalizeForMatch } from '../../core/skills';
+import { workplaceFromText } from '../../core/workplace';
 import { cardMatchesFilters, cardUncheckableFilters } from './search-match';
 import { parseLinkedInSearchPage, type LinkedInCard } from './search-page';
 import { buildLinkedInGuestSearchUrl, LINKEDIN_HOSTS } from './search-url';
@@ -24,9 +28,12 @@ import { buildLinkedInGuestSearchUrl, LINKEDIN_HOSTS } from './search-url';
  * transient errors retried once, and a rate limit, sign-in wall, security check or an
  * unreadable page ends the cycle for this provider (see orchestrator.ts).
  *
- * Results are newest first, so a search reads further pages only while every card on a
- * page is new (not in the seen store), up to `scrapeMaxPagesPerSearch`. New jobs can then
- * be completed with their job page (description, seniority, employment type): `enrich`.
+ * The endpoint applies the keywords and the date-posted window but ignores the workplace,
+ * experience and sort filters (verified 2026-11-17): results come in relevance order. A
+ * search therefore reads further pages while a page still holds jobs not seen in an
+ * earlier cycle, up to `scrapeMaxPagesPerSearch` and within the cycle's page budget
+ * (`searchPagesPerCycle`). New jobs can then be completed with their job page
+ * (description, seniority, employment type, workplace): `enrich`.
  */
 export const PROVIDER_ID = 'linkedin-web-search';
 
@@ -66,18 +73,14 @@ export function toLinkedInProviderError(err: unknown): ProviderError {
 }
 
 /**
- * Remote flag for a card: what the card states ("(Remote)" / "(Hybrid)" / "(On-site)"),
- * otherwise the search's own workplace filter when it allows only one kind. Remote-only
- * searches often return cards showing just a country ("United States"), which would
- * otherwise read as on-site there.
+ * Remote flag for a card: only what the job itself states (the card's "(Remote)" marker,
+ * or the title/location text). The guest endpoint ignores the search's workplace filter
+ * (f_WT; verified 2026-11-17), so a job is never assumed remote because the search asked
+ * for remote jobs. Without any evidence a LinkedIn job counts as on-site at its location;
+ * its job page (`enrich`) can still show it is remote.
  */
-function cardIsRemote(card: LinkedInCard, search: LinkedInSearch): boolean | undefined {
-  if (card.workplace) return card.workplace === 'remote';
-  const workplace = search.workplace ?? [];
-  if (workplace.length === 0) return undefined;
-  if (workplace.every((w) => w === 'remote')) return true;
-  if (!workplace.includes('remote')) return false;
-  return undefined;
+function cardIsRemote(card: LinkedInCard): boolean {
+  return (card.workplace ?? workplaceFromText({ title: card.title, location: card.location })) === 'remote';
 }
 
 /** Maps a parsed search card onto the shared source contract. */
@@ -88,7 +91,7 @@ export function cardToSearchJob(card: LinkedInCard, search: LinkedInSearch): Ext
     title: card.title,
     company: card.company,
     location: card.location,
-    remote: cardIsRemote(card, search),
+    remote: cardIsRemote(card),
     // No description on a card: `enrich` adds it for new jobs when the budget allows.
     applyUrl: card.url,
     sourceUrl: card.url,
@@ -144,12 +147,20 @@ export interface WebSearchOptions {
   /** Jobs already processed in an earlier cycle; without it, each search reads one page. */
   seen?: Pick<SeenStore, 'unseen' | 'markSeen'> | undefined;
   clock?: () => number;
+  /** Results-page requests for the whole cycle (default `searchPagesPerCycle`). */
+  pageBudget?: number;
+  /** Searches the cycle may start, each kept one page of the budget (default `maxSearchesPerCycle`). */
+  searchesPerCycle?: number;
 }
 
 /** The search-cycle provider backed by the LinkedIn guest results endpoint. */
 export function linkedInWebSearchProvider(fetcher: Fetcher, options: WebSearchOptions = {}): LinkedInSearchProvider {
   const clock = options.clock ?? Date.now;
   const seen = options.seen;
+  const pageBudget = options.pageBudget ?? limits.linkedinSearch.searchPagesPerCycle;
+  const searchesPerCycle = options.searchesPerCycle ?? limits.linkedinSearch.maxSearchesPerCycle;
+  let pagesRequested = 0;
+  let searchesStarted = 0;
   let cardsSeen = 0;
   let malformed = 0;
   /** Cards per search that LinkedIn returned but the search's filters reject. */
@@ -175,9 +186,14 @@ export function linkedInWebSearchProvider(fetcher: Fetcher, options: WebSearchOp
       const read = new Set<string>();
       const dropped: string[] = [];
       let start = 0;
+      searchesStarted += 1;
+      /** A further page only if every search still to start keeps its first page. */
+      const mayReadFurther = () => pagesRequested + Math.max(0, searchesPerCycle - searchesStarted) < pageBudget;
       try {
         for (let page = 0; page < limits.linkedinSearch.scrapeMaxPagesPerSearch && !signal.aborted; page++) {
+          if (page > 0 && !mayReadFurther()) break;
           const nowMs = clock();
+          pagesRequested += 1;
           const result = await fetchCards(fetcher, search, start, nowMs, signal);
           cardsSeen += result.cards.length;
           malformed += result.malformed;
@@ -189,11 +205,8 @@ export function linkedInWebSearchProvider(fetcher: Fetcher, options: WebSearchOp
             else dropped.push(card.url);
           }
           if (result.cards.length === 0 || read.size === before) break;
-          // Newest first: a page holding any job seen in an earlier cycle means the search is caught up.
-          if (page + 1 < limits.linkedinSearch.scrapeMaxPagesPerSearch) {
-            const urls = result.cards.map((c) => c.url);
-            if ((await unseen(urls)).length < urls.length) break;
-          }
+          // Relevance order: keep reading while a page still holds jobs not seen before.
+          if (page + 1 < limits.linkedinSearch.scrapeMaxPagesPerSearch && (await unseen(result.cards.map((c) => c.url))).length === 0) break;
           start += result.cards.length;
         }
       } catch (err) {
@@ -212,7 +225,8 @@ export function linkedInWebSearchProvider(fetcher: Fetcher, options: WebSearchOp
       const rejected = filteredOut.get(search.id) ?? 0;
       if (rejected > 0) parts.push(`${rejected} card(s) outside the search's filters dropped`);
       const unchecked = cardUncheckableFilters(search);
-      if (unchecked.length > 0) parts.push(`applied by LinkedIn only: ${unchecked.join(', ')}`);
+      if (unchecked.length > 0) parts.push(`not checked on the job: ${unchecked.join(', ')}`);
+      if (search.experience?.length) parts.push('experience from the title (LinkedIn ignores this filter)');
       return parts.length > 0 ? parts.join('; ') : undefined;
     },
     searched: () => cardsSeen,
@@ -224,13 +238,28 @@ export function linkedInWebSearchProvider(fetcher: Fetcher, options: WebSearchOp
 }
 
 /**
- * Adds each job's description, seniority and employment type from its LinkedIn job page,
- * newest first, at most `detailFetchesPerCycle` and only until `signal` aborts. A job
+ * Jobs worth a job-page request, in request order. Only titles a profile can accept (the
+ * rest are rejected on the title alone); Egypt first, where any workplace qualifies, then
+ * the rest, where the page decides whether the job is remote; newest first within each.
+ */
+export function detailOrder(jobs: readonly ExternalJob[]): ExternalJob[] {
+  const titleFits = (job: ExternalJob) => {
+    const title = normalizeForMatch(job.title);
+    return profiles.some((p) => matchingTerms(title, p.titleInclude).length > 0 && matchingTerms(title, p.titleExclude).length === 0);
+  };
+  const inEgypt = (job: ExternalJob) => countriesIn(job.location ?? '').includes('EG');
+  const published = (job: ExternalJob) => Date.parse(job.publishedAt ?? '') || 0;
+  return jobs.filter(titleFits).sort((a, b) => Number(inEgypt(b)) - Number(inEgypt(a)) || published(b) - published(a));
+}
+
+/**
+ * Adds each job's description, seniority, employment type and workplace from its LinkedIn
+ * job page, in `detailOrder`, at most `detailFetchesPerCycle` and only until `signal` aborts. A job
  * whose page fails or holds no description keeps its card data. A rate limit, block or
  * unreadable response stops further detail requests this cycle.
  */
 export async function enrichWithJobDetails(fetcher: Fetcher, jobs: ExternalJob[], signal: AbortSignal): Promise<EnrichResult> {
-  const order = [...jobs].sort((a, b) => Date.parse(b.publishedAt ?? '') - Date.parse(a.publishedAt ?? '') || 0);
+  const order = detailOrder(jobs);
   const details = new Map<string, ExternalJob>();
   let fetched = 0;
   let failed = 0;

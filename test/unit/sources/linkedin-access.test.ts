@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { limits } from '../../../config/limits';
 import { linkedinSearches, type LinkedInSearch } from '../../../config/linkedin-searches';
-import { initialBreaker } from '../../../src/scraping/circuit-breaker';
+import { initialBreaker, type BreakerState } from '../../../src/scraping/circuit-breaker';
 import type { ExternalJob } from '../../../src/sources/contract';
 import { ProviderError, type LinkedInSearchProvider } from '../../../src/sources/linkedin/provider';
 
@@ -26,7 +26,7 @@ vi.mock('../../../src/data/settings', () => ({ getSettings: mocks.getSettings })
 vi.mock('../../../src/notifications/breaker-alert', () => ({ notifyBreakerTransition: mocks.notifyBreakerTransition }));
 vi.mock('../../../src/core/pipeline', async (orig) => ({ ...(await orig<typeof import('../../../src/core/pipeline')>()), processJobs: mocks.processJobs }));
 
-const { runCycle, dueSearches, searchIntervalMs } = await import('../../../src/handlers/linkedin-orchestrator');
+const { runCycle, dueSearches, isEgyptSearch, searchIntervalMs } = await import('../../../src/handlers/linkedin-orchestrator');
 
 const NOW = Date.parse('2026-11-11T10:00:00Z');
 const MIN = 60_000;
@@ -49,34 +49,55 @@ function makeSeen(known: string[] = []) {
 }
 
 const firstDue = dueSearches(linkedinSearches, {}, NOW);
-const deps = (provider: LinkedInSearchProvider | undefined, seen = makeSeen()) => ({ provider: () => provider, nowMs: () => NOW, seen });
+const deps = (provider: LinkedInSearchProvider | undefined, seen = makeSeen(), hostBreaker: () => Promise<BreakerState | undefined> = async () => undefined) => ({
+  provider: () => provider,
+  nowMs: () => NOW,
+  seen,
+  hostBreaker,
+});
 
 describe('due searches by date-posted window (#3)', () => {
-  const hour = linkedinSearches.find((s) => s.datePosted === 'past-hour')!;
-  const day = linkedinSearches.find((s) => s.datePosted === 'past-24h')!;
-  const week = linkedinSearches.find((s) => s.datePosted === 'past-week')!;
+  const egypt = linkedinSearches.filter(isEgyptSearch);
+  const hour = egypt.find((s) => s.datePosted === 'past-hour')!;
+  const day = egypt.find((s) => s.datePosted === 'past-24h')!;
+  const week = egypt.find((s) => s.datePosted === 'past-week')!;
+  const remoteDay = linkedinSearches.find((s) => !isEgyptSearch(s) && s.datePosted === 'past-24h')!;
 
-  it('runs past-hour searches every cycle, 24 h every 15 min and week hourly', () => {
-    expect(searchIntervalMs(hour)).toBe(3 * MIN);
-    expect(searchIntervalMs(day)).toBe(15 * MIN);
-    expect(searchIntervalMs(week)).toBe(60 * MIN);
-    const ran = { [hour.id]: NOW - 3 * MIN, [day.id]: NOW - 10 * MIN, [week.id]: NOW - 59.5 * MIN };
-    // 24 h ran 10 min ago (not due); week is within the 1-minute slack of its hour.
+  it('runs Egypt past-hour searches every 10 min, 24 h every 20 min and week every 6 h', () => {
+    expect(searchIntervalMs(hour)).toBe(10 * MIN);
+    expect(searchIntervalMs(day)).toBe(20 * MIN);
+    expect(searchIntervalMs(week)).toBe(360 * MIN);
+    const ran = { [hour.id]: NOW - 10 * MIN, [day.id]: NOW - 15 * MIN, [week.id]: NOW - 359.5 * MIN };
+    // 24 h ran 15 min ago (not due); week is within the 1-minute slack of its 6 hours.
     expect(dueSearches([hour, day, week], ran, NOW).map((s) => s.id)).toEqual([hour.id, week.id]);
   });
 
   it('starts at most maxSearchesPerCycle: never-run first (shortest interval first), then the most overdue', () => {
     expect(firstDue).toHaveLength(limits.linkedinSearch.maxSearchesPerCycle);
-    const hourly = linkedinSearches.filter((s) => s.datePosted === 'past-hour').length;
-    expect(firstDue.slice(0, hourly).every((s) => s.datePosted === 'past-hour')).toBe(true);
-    const ran = { [hour.id]: NOW - 1 * MIN, [week.id]: NOW - 180 * MIN, [day.id]: NOW - 20 * MIN };
+    expect(firstDue.map((s) => s.datePosted)).toEqual(['past-hour', 'past-24h']);
+    // Never-run searches compare by interval (their overdue ratios are both infinite).
+    expect(dueSearches([week, day, hour], {}, NOW).map((s) => s.id)).toEqual([hour.id, day.id]);
+    const ran = { [hour.id]: NOW - 1 * MIN, [week.id]: NOW - 1080 * MIN, [day.id]: NOW - 40 * MIN };
     // Week is 3 intervals overdue, 24 h 1.33; past-hour ran a minute ago.
     expect(dueSearches([day, week, hour], ran, NOW).map((s) => s.id)).toEqual([week.id, day.id]);
   });
 
-  it('keeps steady-state traffic to about 140 search requests an hour', () => {
+  it('runs other searches less often: past hour every 30 min, 24 h hourly, week every 12 h', () => {
+    const other = linkedinSearches.filter((s) => !isEgyptSearch(s));
+    expect(searchIntervalMs(other.find((s) => s.datePosted === 'past-hour')!)).toBe(30 * MIN);
+    expect(searchIntervalMs(remoteDay)).toBe(60 * MIN);
+    expect(searchIntervalMs(other.find((s) => s.datePosted === 'past-week')!)).toBe(720 * MIN);
+  });
+
+  it('runs Egypt searches before the others, however overdue those are', () => {
+    expect(firstDue.every(isEgyptSearch)).toBe(true);
+    const ran = { [remoteDay.id]: NOW - 300 * MIN, [day.id]: NOW - 30 * MIN };
+    expect(dueSearches([remoteDay, day], ran, NOW).map((s) => s.id)).toEqual([day.id, remoteDay.id]);
+  });
+
+  it('needs fewer search runs an hour than the cycles can start', () => {
     const perHour = linkedinSearches.reduce((sum, s) => sum + 60 / (searchIntervalMs(s) / MIN), 0);
-    expect(perHour).toBeLessThan(150);
+    expect(perHour).toBeLessThan(limits.linkedinSearch.maxSearchesPerCycle * (60 / limits.linkedinSearch.cycleMinutes));
   });
 });
 
@@ -112,14 +133,13 @@ describe('LinkedIn orchestrator cycle', () => {
       concurrency: 4,
       search: async (s) => {
         if (s.id === a.id) return [job('1'), job('old')];
-        if (s.id === b.id) throw new ProviderError('TRANSIENT', '503 Service Unavailable');
-        return [job('2')];
+        throw new ProviderError('TRANSIENT', '503 Service Unavailable');
       },
     };
     const run = await runCycle(deps(provider, seen));
     expect(run?.status).toBe('SUCCESS');
-    expect(mocks.processJobs).toHaveBeenCalledWith([job('1'), job('2')], expect.objectContaining({ bootstrapped: true }));
-    expect(seen.marked.sort()).toEqual([job('1').sourceUrl, job('2').sourceUrl]);
+    expect(mocks.processJobs).toHaveBeenCalledWith([job('1')], expect.objectContaining({ bootstrapped: true }));
+    expect(seen.marked).toEqual([job('1').sourceUrl]);
     expect(run?.outcomes?.find((o) => o.id === b.id)).toMatchObject({ status: 'FAILED', attempts: limits.linkedinSearch.maxRetries + 1 });
     const saved = mocks.saveSourceState.mock.calls[0]![1] as { cursor: Record<string, number>; success: boolean };
     expect(saved.success).toBe(true);
@@ -193,13 +213,32 @@ describe('LinkedIn orchestrator cycle', () => {
   });
 
   it('runs only due searches, using the stored last-run times', async () => {
-    const ranRecently = Object.fromEntries(linkedinSearches.map((s) => [s.id, NOW - 2.5 * MIN]));
+    const ranRecently = Object.fromEntries(linkedinSearches.map((s) => [s.id, NOW - 9.5 * MIN]));
     mocks.getSourceState.mockResolvedValue(state({ cursor: ranRecently }));
     const searched: LinkedInSearch[] = [];
     const run = await runCycle(deps({ id: 'test', concurrency: 1, search: async (s) => (searched.push(s), []) }));
-    // Ran 2.5 minutes ago: only past-hour searches (3-minute interval, 1-minute slack) are due.
-    expect(searched.length).toBe(linkedinSearches.filter((s) => s.datePosted === 'past-hour').length);
-    expect(searched.every((s) => s.datePosted === 'past-hour')).toBe(true);
+    // Ran 9.5 minutes ago: only Egypt past-hour searches (10-minute interval, 1-minute slack) are due.
+    const expected = linkedinSearches.filter((s) => isEgyptSearch(s) && s.datePosted === 'past-hour');
+    expect(searched.map((s) => s.id)).toEqual(expected.slice(0, limits.linkedinSearch.maxSearchesPerCycle).map((s) => s.id));
+    expect(run?.status).toBe('SUCCESS');
+  });
+
+  it('waits while linkedin.com cools down after a rate limit: no request, nothing stamped', async () => {
+    const cooling: BreakerState = { ...initialBreaker(), status: 'COOLDOWN', consecutive429: 3, cooldownUntil: Date.parse('2026-11-11T11:00:00Z') };
+    const search = vi.fn(async () => []);
+    const run = await runCycle(deps({ id: 'test', concurrency: 1, search }, makeSeen(), async () => cooling));
+    // 11:00 UTC is 13:00 in Cairo (UTC+2 in November).
+    expect(run).toMatchObject({ status: 'DEFERRED', detail: 'linkedin.com rate limit (3× in a row): cooling down until 13:00 Cairo' });
+    expect(search).not.toHaveBeenCalled();
+    expect(mocks.saveSourceState).not.toHaveBeenCalled();
+    expect(mocks.recordRun).toHaveBeenCalledOnce();
+  });
+
+  it('runs once the cooldown has passed', async () => {
+    const cooled: BreakerState = { ...initialBreaker(), status: 'COOLDOWN', consecutive429: 1, cooldownUntil: NOW - 1 };
+    const search = vi.fn(async () => []);
+    const run = await runCycle(deps({ id: 'test', concurrency: 1, search }, makeSeen(), async () => cooled));
+    expect(search).toHaveBeenCalled();
     expect(run?.status).toBe('SUCCESS');
   });
 

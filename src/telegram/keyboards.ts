@@ -71,6 +71,12 @@ function safeUrl(url: string): string | undefined {
 }
 
 /** §11 alert keyboard. */
+/** A friend's copy of an alert: only the link (their button presses would not be accepted). */
+export function sharedAlertKeyboard(applyUrl: string): InlineKeyboard | undefined {
+  const apply = safeUrl(applyUrl);
+  return apply ? { inline_keyboard: [[{ text: 'Apply ↗', url: apply }]] } : undefined;
+}
+
 export function alertKeyboard(jobId: string, applyUrl: string): InlineKeyboard {
   const apply = safeUrl(applyUrl);
   return {

@@ -39,13 +39,14 @@ export async function runDigest(nowMs: number): Promise<{ jobs: number; messages
   for (const [index, chunk] of chunks.entries()) {
     const header = `📬 <b>Digest</b>${chunks.length > 1 ? ` (${index + 1}/${chunks.length})` : ''} — ${ready.length} job${ready.length === 1 ? '' : 's'}`;
     const lines = chunk.map((job, i) => formatJobLine(job, index * perMessage + i + 1));
-    const text = [header, '', ...lines, '', `<i>${escapeHtml('Use /top to act on these jobs.')}</i>`].join('\n');
+    const body = [header, '', ...lines];
+    const text = [...body, '', `<i>${escapeHtml('Use /top to act on these jobs.')}</i>`].join('\n');
     const notificationId = textNotificationId(`digest:${chunk.map((j) => j.jobId).join(',')}`);
     try {
       await ddb().send(
         new TransactWriteCommand({
           TransactItems: [
-            { Put: outboxPut({ notificationId, kind: 'TEXT', text }, nowMs) },
+            { Put: outboxPut({ notificationId, kind: 'TEXT', text, shareable: true, shareText: body.join('\n') }, nowMs) },
             ...chunk.map((job) => digestSentUpdate(job.jobId, nowMs)),
           ] as never,
         }),

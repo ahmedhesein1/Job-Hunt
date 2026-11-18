@@ -1,18 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import { limits } from '../../config/limits';
-import { linkedinSearches, type LinkedInSearch } from '../../config/linkedin-searches';
+import { LINKEDIN_GEO, linkedinSearches, type LinkedInSearch } from '../../config/linkedin-searches';
 import { sources } from '../../config/sources';
 import { PROCESSING_FAILED, processJobs, windowStart, type PipelineStats } from '../core/pipeline';
+import { DynamoDomainGateStore } from '../data/domains';
 import { dynamoSeenStore, type SeenStore } from '../data/seen';
 import { getSettings } from '../data/settings';
 import { acquireLock, getSourceState, recordRun, releaseLock, saveSourceState, type RunSummary } from '../data/sources';
 import { logger } from '../lib/logger';
+import { cairoParts } from '../lib/time';
 import { withUsage } from '../lib/usage';
 import { notifyBreakerTransition } from '../notifications/breaker-alert';
-import { applyOutcome, isBlocked } from '../scraping/circuit-breaker';
+import { applyOutcome, isBlocked, type BreakerState } from '../scraping/circuit-breaker';
 import type { ExternalJob } from '../sources/contract';
 import { runSearchCycle, summarize, type CycleResult } from '../sources/linkedin/orchestrator';
 import { linkedinProvider, type EnrichResult, type LinkedInSearchProvider } from '../sources/linkedin/provider';
+import { LINKEDIN_HOSTS } from '../sources/linkedin/search-url';
 
 const policy = sources['linkedin-search'];
 const LOCK = 'source:linkedin-search';
@@ -22,31 +25,56 @@ export interface OrchestratorDeps {
   nowMs: () => number;
   /** Jobs processed in an earlier cycle (only new ones go through the pipeline). */
   seen: Pick<SeenStore, 'unseen' | 'markSeen'>;
+  /** linkedin.com's host breaker: while it cools down after a rate limit, no cycle runs. */
+  hostBreaker: () => Promise<BreakerState | undefined>;
 }
 
-const defaultDeps: OrchestratorDeps = { provider: linkedinProvider, nowMs: Date.now, seen: dynamoSeenStore };
+const defaultDeps: OrchestratorDeps = { provider: linkedinProvider, nowMs: Date.now, seen: dynamoSeenStore, hostBreaker: linkedinHostBreaker };
 
 /** How often a search runs, from its date-posted window. */
 export function searchIntervalMs(search: LinkedInSearch): number {
-  return limits.linkedinSearch.searchIntervalMinutes[search.datePosted ?? 'any'] * 60_000;
+  const intervals = limits.linkedinSearch.searchIntervalMinutes[isEgyptSearch(search) ? 'egypt' : 'other'];
+  return intervals[search.datePosted ?? 'any'] * 60_000;
+}
+
+/** Egypt searches first: any workplace qualifies there, so their jobs need no job page. */
+export function isEgyptSearch(search: LinkedInSearch): boolean {
+  return search.geoId === LINKEDIN_GEO.egypt || search.location?.trim().toLowerCase() === 'egypt';
 }
 
 /**
- * The searches due this cycle (interval elapsed, less `dueSlackMs`), most overdue first
- * (never-run ones first, then shorter intervals), at most `maxSearchesPerCycle`.
- * `lastRun` holds each search's last completed run (epoch ms) by search ID.
+ * The searches due this cycle (interval elapsed, less `dueSlackMs`): Egypt searches
+ * first, then the most overdue (never-run ones first, then shorter intervals), at most
+ * `maxSearchesPerCycle`. `lastRun` holds each search's last completed run (epoch ms) by ID.
  */
 export function dueSearches(searches: readonly LinkedInSearch[], lastRun: Readonly<Record<string, string | number>>, nowMs: number): LinkedInSearch[] {
   const elapsed = (s: LinkedInSearch) => {
     const last = Number(lastRun[s.id]);
     return Number.isFinite(last) && last > 0 ? nowMs - last : Number.POSITIVE_INFINITY;
   };
+  // Explicit comparison: two never-run searches both have an infinite ratio (∞ − ∞ is NaN).
+  const descending = (a: number, b: number) => (a === b ? 0 : a > b ? -1 : 1);
   return searches
-    .map((search, index) => ({ search, index, interval: searchIntervalMs(search), elapsed: elapsed(search) }))
+    .map((search, index) => {
+      const interval = searchIntervalMs(search);
+      const since = elapsed(search);
+      return { search, index, interval, elapsed: since, overdue: since / interval, egypt: isEgyptSearch(search) };
+    })
     .filter((s) => s.elapsed >= s.interval - limits.linkedinSearch.dueSlackMs)
-    .sort((a, b) => b.elapsed / b.interval - a.elapsed / a.interval || a.interval - b.interval || a.index - b.index)
+    .sort((a, b) => Number(b.egypt) - Number(a.egypt) || descending(a.overdue, b.overdue) || a.interval - b.interval || a.index - b.index)
     .slice(0, limits.linkedinSearch.maxSearchesPerCycle)
     .map(({ search }) => search);
+}
+
+/** `HH:MM` Cairo time, for status lines. */
+function cairoClock(ms: number): string {
+  const p = cairoParts(ms);
+  return `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
+}
+
+/** linkedin.com's host breaker (shared with the fetcher's domain gate). */
+async function linkedinHostBreaker(): Promise<BreakerState | undefined> {
+  return (await new DynamoDomainGateStore().get(LINKEDIN_HOSTS[0]))?.breaker;
 }
 
 /** Last-run times after this cycle: searches that completed (any result) are stamped. */
@@ -119,6 +147,14 @@ export async function runCycle(deps: OrchestratorDeps = defaultDeps): Promise<Ru
     // Paused for review (e.g. LinkedIn changed its page layout): nothing runs until /resume.
     if (isBlocked(state.breaker, startedAt)) {
       run = summaryOf('DEFERRED', `breaker ${state.breaker.status}${state.breaker.pausedReason ? `: ${state.breaker.pausedReason}` : ''}`);
+      return run;
+    }
+    // linkedin.com is cooling down after a rate limit: a request now would only be refused
+    // by the domain gate. Searches stay due and run once the cooldown ends.
+    const host = await deps.hostBreaker();
+    if (host && isBlocked(host, startedAt)) {
+      const until = host.cooldownUntil !== undefined ? ` until ${cairoClock(host.cooldownUntil)} Cairo` : '';
+      run = summaryOf('DEFERRED', `linkedin.com ${host.status === 'COOLDOWN' ? `rate limit (${host.consecutive429}× in a row): cooling down` : `${host.status}${host.pausedReason ? `: ${host.pausedReason}` : ''}`}${until}`);
       return run;
     }
     const lastRun = state.cursor ?? {};
@@ -207,7 +243,8 @@ export async function runCycle(deps: OrchestratorDeps = defaultDeps): Promise<Ru
       cards: result.searched,
       jobs: result.jobs.length,
       new: fresh.length,
-      descriptions: enriched.fetched,
+      // Not `descriptions`: the logger redacts keys that look like job text.
+      jobPages: enriched.fetched,
       malformed: result.malformed,
       durationMs: run.durationMs,
     });

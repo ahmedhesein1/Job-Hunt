@@ -4,8 +4,8 @@ import { addBoard, completeBoardCheck, leaseBoard, queryDueBoards, resumeBoard, 
 import { setDdbClient } from '../../../src/data/client';
 import { DynamoDomainGateStore, resetDomainGate } from '../../../src/data/domains';
 import { attachDuplicate, digestSentUpdate, queryByStatus, queryDigest, setJobNotified, transitionStatus } from '../../../src/data/jobs';
-import { markFailed, markQueued, markSent, pendingSummary, putTextNotification, queryPending, recordAttempt } from '../../../src/data/outbox';
-import { instantCapUpdate, setCompanyMuted, setPaused, defaultSettings } from '../../../src/data/settings';
+import { markFailed, markQueued, markSent, pendingSummary, putSharedCopies, putTextNotification, queryPending, recordAttempt, sharedNotificationId } from '../../../src/data/outbox';
+import { instantCapUpdate, setCompanyMuted, setPaused, setShareChat, defaultSettings } from '../../../src/data/settings';
 import { acquireLock, markAttempt, recordRun, releaseLock, resetSourceBreaker, saveSourceState, type RunSummary } from '../../../src/data/sources';
 import { claimUpdate, deferSendSlot, recordSuccessfulSend, reserveSendSlot } from '../../../src/data/telegram-updates';
 import { initialBreaker } from '../../../src/scraping/circuit-breaker';
@@ -75,8 +75,11 @@ beforeAll(async () => {
   recorded.push(instantCapUpdate('2026-11-10', { ...settings, day: '2026-11-10' }).Update as Input);
   await setCompanyMuted('acme', 'Acme', true);
   await setCompanyMuted('acme', 'Acme', false);
+  await setShareChat('555', true);
+  await setShareChat('555', false);
 
   await putTextNotification('k', 'text', NOW);
+  await putSharedCopies({ notificationId: 'n', kind: 'TEXT', status: 'SENT', createdAt: '', text: 'full', shareText: 'for friends', shareable: true }, ['555'], NOW);
   await markQueued('n', NOW);
   await markSent('n', 1, NOW);
   await markFailed('n', 'r');
@@ -130,5 +133,19 @@ describe('DynamoDB expressions use every supplied placeholder', () => {
       return bad.length ? [`${String(input.UpdateExpression ?? input.KeyConditionExpression ?? input.ConditionExpression)} → unused ${bad.join(', ')}`] : [];
     });
     expect(problems).toEqual([]);
+  });
+});
+
+describe("friends' copies (/friends)", () => {
+  it('one PENDING copy per friend with its own ID, recipient and friend-facing text', () => {
+    const copy = recorded.find((r) => (r.Item as Record<string, unknown> | undefined)?.recipientChatId === '555')?.Item as Record<string, unknown>;
+    expect(copy).toMatchObject({ PK: `NOTIF#${sharedNotificationId('n', '555')}`, status: 'PENDING', kind: 'TEXT', text: 'for friends', sharedFrom: 'n' });
+    // A copy is never itself shared again.
+    expect(copy.shareable).toBeUndefined();
+  });
+
+  it('rejects anything but a private-chat user ID', async () => {
+    await expect(setShareChat('-100123', true)).rejects.toThrow('invalid Telegram user ID');
+    await expect(setShareChat('abc', true)).rejects.toThrow('invalid Telegram user ID');
   });
 });

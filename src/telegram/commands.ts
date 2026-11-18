@@ -13,12 +13,14 @@ import { getJob, lookupDedupe, queryByStatus, transitionStatus, type JobItem } f
 import { keys, type UserStatus } from '../data/keys';
 import { recordMissedReport } from '../data/missed';
 import { pendingSummary } from '../data/outbox';
-import { getSettings, setCompanyMuted, setPaused } from '../data/settings';
+import { getSettings, setCompanyMuted, setPaused, setShareChat, TELEGRAM_USER_ID } from '../data/settings';
 import { getSourceStates, resetSourceBreaker } from '../data/sources';
 import { loadDays, loadSnapshot } from '../cost/collect';
 import { buildCostReport } from '../cost/report';
 import { runDigest } from '../handlers/digest';
-import { DAY_MS, iso, relativeAge } from '../lib/time';
+import { telegramChatId } from '../lib/secrets';
+import { cairoDayKey, DAY_MS, iso, relativeAge } from '../lib/time';
+import { queueFriendCatchUp } from '../notifications/catch-up';
 import { escapeHtml, formatJobList } from '../notifications/formatting';
 import { sqsClient } from '../notifications/queue';
 import { resetBreaker } from '../scraping/circuit-breaker';
@@ -53,6 +55,7 @@ const HELP = [
   '/linkedin [fresh|egypt|remote] — saved LinkedIn searches; send a saved results page (.html) back to import it',
   '/digest — send the digest now',
   '/cost [refresh] — AWS usage, projected monthly cost and budget',
+  '/friends [add|remove &lt;user id&gt;] — friends who also get the job alerts and digests',
   '/help — this message',
 ].join('\n');
 
@@ -133,11 +136,44 @@ async function status(): Promise<Reply> {
     lines.push(`${icon} <b>${escapeHtml(p.name)}</b> — last success ${lastSuccess}${runInfo}${runDetail}${breaker}${stale ? ' · stale' : ''}`);
   }
   lines.push('', `Active boards: ${settings.activeBoards}/${limits.boards.maxActiveBoards}`);
-  lines.push(`Instant alerts: ${settings.paused ? 'paused ⏸' : 'on'} · today ${settings.day ? settings.instantSentToday : 0}/${settings.maxInstantAlertsPerDay}`);
+  // The counter belongs to `settings.day` (Cairo); it only resets at the next instant alert.
+  const sentToday = settings.day === cairoDayKey(now) ? settings.instantSentToday : 0;
+  lines.push(`Instant alerts: ${settings.paused ? 'paused ⏸' : 'on'} · today ${sentToday}/${settings.maxInstantAlertsPerDay}`);
   lines.push(`Outbox pending: ${pending.count}${pending.truncated ? '+' : ''}${pending.oldestCreatedAt ? ` (oldest ${relativeAge(Date.parse(pending.oldestCreatedAt), now)})` : ''}`);
   lines.push(`Notification DLQ: ${dlq ?? 'n/a'} · Stream failures: ${streamDlq ?? 'n/a'}`);
   if (settings.mutedCompanies.size > 0) lines.push(`Muted companies: ${settings.mutedCompanies.size}`);
+  if (settings.shareChatIds.size > 0) lines.push(`Friends receiving alerts: ${settings.shareChatIds.size} (/friends)`);
   return { text: lines.join('\n') };
+}
+
+const FRIENDS_HOW_TO = [
+  'A friend first opens this bot in Telegram and presses <b>Start</b> (a bot cannot message',
+  'anyone who has not), then sends you their numeric user ID (e.g. from @userinfobot).',
+  'Friends get the job alerts and digests with an Apply link only: no commands, buttons or',
+  'system messages. /pause pauses their instant alerts too.',
+].join(' ');
+
+/** `/friends`, `/friends add <id>`, `/friends remove <id>`: who else gets the alerts. */
+async function friends(arg: string): Promise<Reply> {
+  const [action, id] = arg.split(/\s+/).filter(Boolean);
+  if (!action) {
+    const ids = [...(await getSettings()).shareChatIds].sort();
+    const list = ids.length > 0 ? ids.map((i) => `• <code>${i}</code>`).join('\n') : 'No friends added yet.';
+    return {
+      text: [`👥 <b>Friends receiving alerts</b> (${ids.length})`, list, '', '/friends add &lt;user id&gt; · /friends remove &lt;user id&gt;', '', FRIENDS_HOW_TO].join('\n'),
+    };
+  }
+  const verb = action.toLowerCase();
+  if ((verb !== 'add' && verb !== 'remove') || !id) return { text: 'Usage: /friends, /friends add &lt;user id&gt;, /friends remove &lt;user id&gt;' };
+  if (!TELEGRAM_USER_ID.test(id)) return { text: 'A Telegram user ID is a positive number, e.g. 123456789. Group and channel IDs are not supported.' };
+  if (id === telegramChatId()) return { text: 'That is your own chat: you already get every alert.' };
+  await setShareChat(id, verb === 'add');
+  if (verb === 'remove') return { text: `👥 Removed <code>${id}</code>. They get no further alerts.` };
+  // Alerts only start now, so the friend first gets the best recent jobs.
+  const caughtUp = await queueFriendCatchUp(id, await getSettings(), Date.now());
+  return {
+    text: `👥 Added <code>${id}</code>: a welcome message and the best ${caughtUp} job(s) of the last ${limits.notifications.friendCatchUpDays} days are on their way, then every new alert and digest (if they have pressed Start on this bot).`,
+  };
 }
 
 /** Clears a manual-review pause on a source and its hosts after human review. */
@@ -233,6 +269,8 @@ export async function handleCommand(text: string): Promise<Reply> {
       return cost(arg);
     case 'linkedin':
       return linkedinSearchesReply(arg);
+    case 'friends':
+      return friends(arg);
     case 'digest': {
       const result = await runDigest(Date.now());
       return { text: result.jobs === 0 ? '📭 No jobs waiting for the digest.' : `📬 Digest queued: ${result.jobs} job(s) in ${result.messages} message(s).` };
